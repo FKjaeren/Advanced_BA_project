@@ -16,3 +16,5 @@ reviews_df.columns
 rating_df['timestamp'] = pd.to_datetime(rating_df['timestamp'], origin = 'unix', unit = 's')
 
 ### Time span = 2000-06-19 to 2018-10-07
+
+reviews_df['timestamp'] = pd.to_datetime(reviews_df['unixReviewTime'], origin = 'unix', unit = 's')
