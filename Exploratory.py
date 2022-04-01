@@ -9,6 +9,11 @@ def preprocess_data(ratings_df, reviews_df):
 
     # drop columns in reviews
     reviews_df = reviews_df.drop(columns=['unixReviewTime','reviewTime','reviewerName','vote','image','style','verified'])
+    
+    # drop na's and duplicates
+    reviews_df = reviews_df.dropna()
+    reviews_df = reviews_df.drop_duplicates(keep='first')
+    ratings_df = ratings_df.drop_duplicates(keep='first')
 
     return ratings_df, reviews_df
 
