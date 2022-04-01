@@ -2,12 +2,20 @@
 import pandas as pd
 
 ### Import raw data
-rating_df = pd.read_csv('data/Grocery_and_Gourmet_Food.csv', names = ['item','user','rating','timestamp'])
-reviews_df = pd.read_json('data/Grocery_and_Gourmet_Food_5.json', lines=True)
+def load_data(rating_filepath, review_filepath):
+    ratings_df = pd.read_csv(rating_filepath, names = ['item','user','rating','timestamp'])
+    reviews_df = pd.read_json(review_filepath, lines=True)
+
+    return ratings_df, reviews_df
+
+rating_filepath = 'data/Grocery_and_Gourmet_Food.csv'
+review_filepath = 'data/Grocery_and_Gourmet_Food_5.json'
+
+rating_df, reviews_df = load_data(rating_filepath, review_filepath)
 
 ### Show raw data
-rating_df.head()
-reviews_df.head()
+# rating_df.head()
+# reviews_df.head()
 
 ###
 reviews_df.columns
