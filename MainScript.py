@@ -1,5 +1,5 @@
-
 from CreateData import load_data
+import pandas as pd
 
 rating_filepath = 'data/Grocery_and_Gourmet_Food.csv'
 review_filepath = 'data/Grocery_and_Gourmet_Food_5.json'
