@@ -19,8 +19,10 @@ def preprocess_data(ratings_df, reviews_df):
 
 rating_filepath = 'data/Grocery_and_Gourmet_Food.csv'
 review_filepath = 'data/Grocery_and_Gourmet_Food_5.json'
+something_filepath = 'data/Grocery_and_Gourmet_Food.json'
+metadata_filepath = 'data/meta_Grocery_and_Gourmet_Food.json'
 
-raw_ratings, raw_reviews = load_data(rating_filepath, review_filepath)
+raw_ratings, raw_reviews, raw_something, raw_metadata = load_data(rating_filepath, review_filepath, something_filepath, metadata_filepath)
 
 # rating ['item', 'user', 'rating', 'timestamp']
 # review ['overall','reviewerID','asin','reviewText','summary','timestamp]
