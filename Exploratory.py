@@ -6,7 +6,7 @@ def preprocess_data(ratings_df, reviews_df):
     # create timestamps
     ratings_df['timestamp'] = pd.to_datetime(ratings_df['timestamp'], origin = 'unix', unit = 's')
     reviews_df['timestamp'] = pd.to_datetime(reviews_df['unixReviewTime'], origin = 'unix', unit = 's')
-
+    raw_metadata['timestamp'] = pd.to_datetime(raw_metadata['date'].apply(str), format = '%B %d, %Y', errors='coerce')
     # drop columns in reviews
     reviews_df = reviews_df.drop(columns=['unixReviewTime','reviewTime','reviewerName','vote','image','style','verified'])
     
@@ -21,7 +21,7 @@ rating_filepath = 'data/Grocery_and_Gourmet_Food.csv'
 review_filepath = 'data/Grocery_and_Gourmet_Food_5.json'
 metadata_filepath = 'data/meta_Grocery_and_Gourmet_Food.json'
 
-raw_ratings, raw_reviews, raw_metadata = load_data(rating_filepath, review_filepath, metadata_filepath)
+raw_ratings, raw_reviews, raw_metadata = load_data(rating_filepath=rating_filepath, review_filepath=review_filepath, metadata_filepath=metadata_filepath)
 
 # rating ['item', 'user', 'rating', 'timestamp']
 # review ['overall','reviewerID','asin','reviewText','summary','timestamp]
