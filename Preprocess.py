@@ -23,7 +23,7 @@ def prepare_data(ratings_df, reviews_df, metadata_df):
     grouped_ratings = ratings_df[['item','rating']].groupby(by='item').agg({'rating':'mean','item':'size'}).rename(columns={'rating':'avg_rating','item':'num_ratings'}).reset_index()
     metadata_df = grouped_ratings.merge(metadata_df, how='outer', left_on='item', right_on='asin')
     metadata_df['item'].fillna(metadata_df['asin'], inplace=True)
-    metadata_df = metadata_df.drop(columns=['asin','date'])
+    metadata_df = metadata_df.drop(columns=['asin','date','tech1','tech2','fit'])
 
     # preprocess price
     metadata_df['price'] =  pd.to_numeric(metadata_df['price'].str.replace('$',''), errors='coerce')
@@ -31,8 +31,43 @@ def prepare_data(ratings_df, reviews_df, metadata_df):
     return reviews_df, metadata_df
 
 def preprocess_data(metadata_df):
+    
+    X = metadata_df[['item', 'avg_rating', 'num_ratings', 'category', 'also_buy', 'brand', 'feature', 'rank',
+       'also_view', 'main_cat', 'similar_item', 'price', 'details','timestamp']]
 
+    # get category
+    X['category'] = X['category'].fillna('')
+    X['category'] = X['category'].apply(get_category)
+
+    # get number of also_buy
+    X['also_buy'] = X['also_buy'].fillna('')
+    X['also_buy'] = X['also_buy'].apply(get_number_also_buy)
+
+    # brand
+    X['brand'] = X['brand'].str.replace('Unknown','')
+
+
+    # get dummies for: category
     return
+
+def get_category(row):
+    if len(row) > 1:
+        category = row[1]
+    else:
+        category = row
+    return category
+
+def get_number_also_buy(row):
+    number = len(row)
+    return number
+
+def get_brand(row, **kwargs):
+    if row in kwargs:
+        return row
+    else:
+        return ''
+
+
 
 rating_filepath = 'data/Grocery_and_Gourmet_Food.csv'
 review_filepath = 'data/Grocery_and_Gourmet_Food_5.json'
@@ -43,10 +78,12 @@ raw_ratings, raw_reviews, raw_metadata = load_data(rating_filepath=rating_filepa
 reviews_df, metadata_df = prepare_data(raw_ratings, raw_reviews, raw_metadata)
 
 
+metadata_df['brand'] = metadata_df['brand'].str.replace('Unknown','')
+brands = metadata_df['brand'].value_counts().sort_values(ascending=False).index[1:11].to_list()
+metadata_df['new_brand'] = metadata_df['brand'].apply(get_brand, brands)
 
-
-reviews_df.to_csv('data/reviews_df.csv')
-metadata_df.to_csv('data/metadata_df.csv')
+reviews_df.to_csv('data/reviews_df.csv',index=False)
+metadata_df.to_csv('data/metadata_df.csv',index=False)
 
 
 
