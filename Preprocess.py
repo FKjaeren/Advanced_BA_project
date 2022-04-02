@@ -2,6 +2,8 @@ from CreateData import load_data
 import seaborn as sns
 import pandas as pd
 import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
 
 def prepare_data(ratings_df, reviews_df, metadata_df):
     # create timestamps
@@ -33,8 +35,8 @@ def prepare_data(ratings_df, reviews_df, metadata_df):
 
 def preprocess_data(metadata_df):
     
-    X = metadata_df[['item', 'avg_rating', 'num_ratings', 'category', 'also_buy', 'brand', 'feature', 'rank',
-       'also_view', 'main_cat', 'similar_item', 'price', 'details']]
+    X = metadata_df[['avg_rating','num_ratings', 'category', 'also_buy', 'brand', 'rank',
+       'also_view', 'price']]
 
     # get category
     X['category'] = X['category'].fillna('')
@@ -74,11 +76,19 @@ def preprocess_data(metadata_df):
     X['price'] = X.apply(lambda row: category_stat_df.loc[row['category']].values[0] if row['price'] != row['price'] else row['price'], axis = 1)
 
     # get dummies for: category, top_brands
+    # get number of also_view
+    X['also_view'] = X['also_view'].fillna('')
+    X['also_view'] = X['also_view'].apply(get_number_also_buy)
 
     # drop nan's
     X = X.dropna(axis=0,subset=['avg_rating','num_ratings','category'])
 
-    return X
+    # get dummies for: category, top_brand
+    X = pd.get_dummies(X, columns=['category','top_brand'])
+
+    y = X['avg_rating']
+    X = X.drop(columns=['avg_rating'])
+    return X, y
 
 def get_category(row):
     if len(row) > 1:
@@ -115,12 +125,15 @@ raw_ratings, raw_reviews, raw_metadata = load_data(rating_filepath=rating_filepa
 
 reviews_df, metadata_df = prepare_data(raw_ratings, raw_reviews, raw_metadata)
 
-X = preprocess_data(metadata_df)
+X, y = preprocess_data(metadata_df)
+
+X = X.drop(columns='price')
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
 
 
+reg = LinearRegression().fit(X_train, y_train)
+print(reg.score(X_test, y_test))
 
-#category_stat_df['category_means'].fillna(0)
-# EXTRaCT DIGITS
 
 # reviews_df.to_csv('data/reviews_df.csv',index=False)
 # metadata_df.to_csv('data/metadata_df.csv',index=False)
