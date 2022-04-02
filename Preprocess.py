@@ -57,6 +57,22 @@ def preprocess_data(metadata_df):
     X['rank'] = X['rank'].str.extract('(\d+|$)')
     X['rank'] = pd.to_numeric(X['rank'], errors = 'coerce').fillna(0).apply(int)
 
+    # Fill nan values for price data
+    categories = []
+    category_means = []
+    categories = X.category.unique()
+    for i in categories:
+        temp = X[X['price'].isna()==False]
+        mean_value = temp[temp['category']==i]['price'].mean()
+        category_means.append(mean_value)
+
+    dict = {'categories': categories,'category_means':category_means}
+
+    category_stat_df = pd.DataFrame(dict)
+    category_stat_df = category_stat_df.set_index('categories')
+
+    X['price'] = X.apply(lambda row: category_stat_df.loc[row['category']].values[0] if row['price'] != row['price'] else row['price'], axis = 1)
+
     # get dummies for: category, top_brands
 
     # drop nan's
@@ -101,12 +117,13 @@ reviews_df, metadata_df = prepare_data(raw_ratings, raw_reviews, raw_metadata)
 
 X = preprocess_data(metadata_df)
 
+
+
+#category_stat_df['category_means'].fillna(0)
 # EXTRaCT DIGITS
 
 # reviews_df.to_csv('data/reviews_df.csv',index=False)
 # metadata_df.to_csv('data/metadata_df.csv',index=False)
-
-
 
 
 
