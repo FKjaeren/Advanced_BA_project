@@ -4,6 +4,18 @@ import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
+from collections import Counter
+from sklearn.feature_extraction import _stop_words
+import string
+import nltk
+nltk.download('wordnet')
+nltk.download('punkt')
+from nltk.stem import WordNetLemmatizer
+lemmatizer = WordNetLemmatizer()
+Stop_Words= _stop_words.ENGLISH_STOP_WORDS
+from bs4 import BeautifulSoup
+
+
 
 def prepare_data(ratings_df, reviews_df, metadata_df):
     # create timestamps
@@ -117,14 +129,7 @@ def get_rank(row):
         return row
 
 
-from sklearn.feature_extraction import _stop_words
-import string
-import nltk
-nltk.download('wordnet')
-nltk.download('punkt')
-from nltk.stem import WordNetLemmatizer
-lemmatizer = WordNetLemmatizer()
-Stop_Words= _stop_words.ENGLISH_STOP_WORDS
+
 def text_processing(text):
     # remove punctuation 
     text = "".join([c for c in text 
@@ -145,7 +150,6 @@ metadata_filepath = 'data/meta_Grocery_and_Gourmet_Food.json.gz'
 raw_ratings, raw_reviews, raw_metadata = load_data(rating_filepath=rating_filepath, review_filepath=review_filepath, metadata_filepath=metadata_filepath)
 
 
-from bs4 import BeautifulSoup
 raw_metadata['feature']=raw_metadata['feature'].apply(str)
 
 raw_metadata["feature"] = raw_metadata[["feature"]].applymap(lambda text: BeautifulSoup(text, 'html.parser').get_text())
@@ -154,15 +158,12 @@ raw_metadata["feature"].value_counts()
 
 raw_metadata['feature_clean'] = raw_metadata['feature'].apply(text_processing)
 
-from collections import Counter
 Counter(" ".join(raw_metadata["feature_clean"]).split()).most_common(1000)
 
 
+c = (raw_metadata['feature_clean'] == '').sum()
+print(c)
 
-
-
-
-#df[['html']].applymap(lambda text: BeautifulSoup(text, 'html.parser').get_text())
 
 
 reviews_df, metadata_df = prepare_data(raw_ratings, raw_reviews, raw_metadata)
@@ -184,3 +185,5 @@ metadata_df
 
 
 
+
+# %%
