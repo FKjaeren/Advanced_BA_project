@@ -117,14 +117,55 @@ def get_rank(row):
         return row
 
 
+from sklearn.feature_extraction import _stop_words
+import string
+import nltk
+nltk.download('wordnet')
+nltk.download('punkt')
+from nltk.stem import WordNetLemmatizer
+lemmatizer = WordNetLemmatizer()
+Stop_Words= _stop_words.ENGLISH_STOP_WORDS
+def text_processing(text):
+    # remove punctuation 
+    text = "".join([c for c in text 
+                    if c not in string.punctuation])
+    # lowercase
+    text = "".join([c.lower() for c in text])
+    # remove stopwords
+    text = " ".join([w for w in text.split() 
+                     if w not in Stop_Words])
+    # stemming / lematizing (optional)
+    text = " ".join([lemmatizer.lemmatize(w) for w in text.split()])
+    return text
+
 rating_filepath = 'data/Grocery_and_Gourmet_Food.csv'
-review_filepath = 'data/Grocery_and_Gourmet_Food_5.json'
-metadata_filepath = 'data/meta_Grocery_and_Gourmet_Food.json'
+review_filepath = 'data/Grocery_and_Gourmet_Food_5.json.gz' # Har ændret til gz da min fil hedder det, ved ikke hvad forskel det gør for jer
+metadata_filepath = 'data/meta_Grocery_and_Gourmet_Food.json.gz'
 
 raw_ratings, raw_reviews, raw_metadata = load_data(rating_filepath=rating_filepath, review_filepath=review_filepath, metadata_filepath=metadata_filepath)
 
-reviews_df, metadata_df = prepare_data(raw_ratings, raw_reviews, raw_metadata)
 
+from bs4 import BeautifulSoup
+raw_metadata['feature']=raw_metadata['feature'].apply(str)
+
+raw_metadata["feature"] = raw_metadata[["feature"]].applymap(lambda text: BeautifulSoup(text, 'html.parser').get_text())
+raw_metadata["feature"].value_counts()
+
+
+raw_metadata['feature_clean'] = raw_metadata['feature'].apply(text_processing)
+
+from collections import Counter
+Counter(" ".join(raw_metadata["feature_clean"]).split()).most_common(1000)
+
+
+
+
+
+
+#df[['html']].applymap(lambda text: BeautifulSoup(text, 'html.parser').get_text())
+
+
+reviews_df, metadata_df = prepare_data(raw_ratings, raw_reviews, raw_metadata)
 X, y = preprocess_data(metadata_df)
 
 X = X.drop(columns='price')
@@ -134,6 +175,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random
 reg = LinearRegression().fit(X_train, y_train)
 print(reg.score(X_test, y_test))
 
+metadata_df
 
 # reviews_df.to_csv('data/reviews_df.csv',index=False)
 # metadata_df.to_csv('data/metadata_df.csv',index=False)
