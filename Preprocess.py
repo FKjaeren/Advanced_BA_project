@@ -95,7 +95,7 @@ def preprocess_data(metadata_df):
     X['description'] = X['description'].apply(str)
     X['description'] = X['description'].str.replace('\n', '')
 
-    X["description"] = X[["description"]].applymap(lambda text: BeautifulSoup(text, 'html.parser').get_text())
+    X['description'] = X[['description']].applymap(lambda text: BeautifulSoup(text, 'html.parser').get_text())
     X['description_clean'] = X['description'].apply(text_processing)
 
     # drop nan's
@@ -104,9 +104,9 @@ def preprocess_data(metadata_df):
     # get dummies for: category, top_brand
     X = pd.get_dummies(X, columns=['category','top_brand'])
 
-    y = X['avg_rating']
-    X = X.drop(columns=['avg_rating'])
-    return X, y
+    #y = X['avg_rating']
+    #X = X.drop(columns=['avg_rating'])
+    return X
 
 def get_category(row):
     if len(row) > 1:
@@ -155,7 +155,7 @@ raw_ratings, raw_reviews, raw_metadata = load_data(rating_filepath=rating_filepa
 #Counter(" ".join(raw_metadata["description_clean"]).split()).most_common(1000)
 
 reviews_df, metadata_df = prepare_data(raw_ratings, raw_reviews, raw_metadata)
-X, y = preprocess_data(metadata_df)
+metadata_df_clean = preprocess_data(metadata_df)
 
 #X = X.drop(columns='price')
 #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
@@ -164,12 +164,6 @@ X, y = preprocess_data(metadata_df)
 #reg = LinearRegression().fit(X_train, y_train)
 #print(reg.score(X_test, y_test))
 
-# reviews_df.to_csv('data/reviews_df.csv',index=False)
-# metadata_df.to_csv('data/metadata_df.csv',index=False)
+reviews_df.to_csv('data/reviews_df.csv',index=False)
+metadata_df_clean.to_csv('data/metadata_df.csv',index=False)
 
-
-
-
-
-
-# %%
