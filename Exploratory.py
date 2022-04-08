@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 
 
 df = pd.read_csv('data/metadata_df.csv')
-df = df.drop(columns=['Unnamed: 0'])
 
 sns.pairplot(df)
 plt.show()
