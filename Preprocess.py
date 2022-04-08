@@ -2,8 +2,6 @@ from CreateData import load_data
 import seaborn as sns
 import pandas as pd
 import numpy as np
-from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
 from collections import Counter
 from sklearn.feature_extraction import _stop_words
 import string
@@ -156,13 +154,6 @@ raw_ratings, raw_reviews, raw_metadata = load_data(rating_filepath=rating_filepa
 
 reviews_df, metadata_df = prepare_data(raw_ratings, raw_reviews, raw_metadata)
 metadata_df_clean = preprocess_data(metadata_df)
-
-#X = X.drop(columns='price')
-#X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
-
-
-#reg = LinearRegression().fit(X_train, y_train)
-#print(reg.score(X_test, y_test))
 
 reviews_df.to_csv('data/reviews_df.csv',index=False)
 metadata_df_clean.to_csv('data/metadata_df.csv',index=False)
