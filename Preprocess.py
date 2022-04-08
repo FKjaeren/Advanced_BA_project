@@ -96,7 +96,7 @@ def preprocess_data(metadata_df):
     X['description'] = X['description'].str.replace('\n', '')
 
     X['description'] = X[['description']].applymap(lambda text: BeautifulSoup(text, 'html.parser').get_text())
-    X['description_clean'] = X['description'].apply(text_processing)
+    X['description'] = X['description'].apply(text_processing)
 
     # drop nan's
     X = X.dropna(axis=0,subset=['avg_rating','num_ratings','category'])
