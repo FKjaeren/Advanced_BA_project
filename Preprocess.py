@@ -150,10 +150,11 @@ review_filepath = 'data/Grocery_and_Gourmet_Food_5.json' # Har ændret til gz da
 metadata_filepath = 'data/meta_Grocery_and_Gourmet_Food.json'
 
 raw_ratings, raw_reviews, raw_metadata = load_data(rating_filepath=rating_filepath, review_filepath=review_filepath, metadata_filepath=metadata_filepath)
-#Counter(" ".join(raw_metadata["description_clean"]).split()).most_common(1000)
 
 reviews_df, metadata_df = prepare_data(raw_ratings, raw_reviews, raw_metadata)
 metadata_df_clean = preprocess_data(metadata_df)
+
+#Counter(" ".join(metadata_df_clean["description"]).split()).most_common(1000)
 
 reviews_df.to_csv('data/reviews_df.csv',index=False)
 metadata_df_clean.to_csv('data/metadata_df.csv',index=False)
