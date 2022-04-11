@@ -14,6 +14,8 @@ from nltk.stem import WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
 Stop_Words= _stop_words.ENGLISH_STOP_WORDS
 from bs4 import BeautifulSoup
+from gensim import corpora
+from gensim.models.ldamodel import LdaModel
 
 
 
@@ -95,8 +97,8 @@ def preprocess_data(metadata_df):
     X['description'] = X['description'].apply(str)
     X['description'] = X['description'].str.replace('\n', '')
 
-    X["description"] = X[["description"]].applymap(lambda text: BeautifulSoup(text, 'html.parser').get_text())
-    X['description_clean'] = X['description'].apply(text_processing)
+    X['description'] = X[['description']].applymap(lambda text: BeautifulSoup(text, 'html.parser').get_text())
+    X['description'] = X['description'].apply(text_processing)
 
     # drop nan's
     X = X.dropna(axis=0,subset=['avg_rating','num_ratings','category'])
@@ -148,7 +150,7 @@ def text_processing(text):
     return text
 
 rating_filepath = 'data/Grocery_and_Gourmet_Food.csv'
-review_filepath = 'data/Grocery_and_Gourmet_Food_5.json' # Har ændret til gz da min fil hedder det, ved ikke hvad forskel det gør for jer
+review_filepath = 'data/Grocery_and_Gourmet_Food_5.json' 
 metadata_filepath = 'data/meta_Grocery_and_Gourmet_Food.json'
 
 raw_ratings, raw_reviews, raw_metadata = load_data(rating_filepath=rating_filepath, review_filepath=review_filepath, metadata_filepath=metadata_filepath)
@@ -156,6 +158,15 @@ raw_ratings, raw_reviews, raw_metadata = load_data(rating_filepath=rating_filepa
 
 reviews_df, metadata_df = prepare_data(raw_ratings, raw_reviews, raw_metadata)
 X, y = preprocess_data(metadata_df)
+
+
+
+# num_lda_topics = 20
+# split ved mellemrum så hver product har ['word1', 'word2', ...]
+# docs = [['word1_doc1', 'word2_doc1',...], ..., ['word1_docn', 'word2_docn',...]]
+# dictionary = corpora.Dictionary(docs)
+# corpus = [dictionary.doc2bow(d) for d in docs]
+# lda = LdaModel(corpus=corpus, id2word=dictionary, num_topics=num_lda_topics, update_every=1, passes=5, alpha='symmetric')
 
 #X = X.drop(columns='price')
 #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
@@ -166,10 +177,3 @@ X, y = preprocess_data(metadata_df)
 
 # reviews_df.to_csv('data/reviews_df.csv',index=False)
 # metadata_df.to_csv('data/metadata_df.csv',index=False)
-
-
-
-
-
-
-# %%
