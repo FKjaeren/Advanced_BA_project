@@ -6,7 +6,7 @@ import numpy as np
 import pickle
 from datetime import date
 
-df = pd.read_csv('data/metadata_df.csv')
+df = pd.read_csv('data/metadata_df_preprocessed.csv')
 
 def get_len(text):
     if text != text:

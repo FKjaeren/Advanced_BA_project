@@ -44,8 +44,7 @@ def prepare_data(ratings_df, reviews_df, metadata_df):
 
 def preprocess_data(metadata_df):
     
-    X = metadata_df[['avg_rating','num_ratings', 'category', 'also_buy', 'brand', 'rank',
-       'also_view', 'price','description']]
+    X = metadata_df[['avg_rating','num_ratings', 'category', 'also_buy', 'brand', 'rank','also_view', 'price','description']]
 
     # get category
     X['category'] = X['category'].fillna('')
@@ -88,7 +87,8 @@ def preprocess_data(metadata_df):
     # get number of also_view
     X['also_view'] = X['also_view'].fillna('')
     X['also_view'] = X['also_view'].apply(get_number_also_buy)
-
+    X['description'] = X['description'].apply(get_description)
+    X = X.dropna(axis = 0, subset=['description'])
     X['description'] = X['description'].apply(str)
     X['description'] = X['description'].str.replace('\n', '')
 
@@ -99,7 +99,7 @@ def preprocess_data(metadata_df):
     X = X.dropna(axis=0,subset=['avg_rating','num_ratings','category','description'])
 
     # get dummies for: category, top_brand
-    X = pd.get_dummies(X, columns=['category','top_brand'])
+    #X = pd.get_dummies(X, columns=['category','top_brand'])
 
     #y = X['avg_rating']
     #X = X.drop(columns=['avg_rating'])
@@ -130,6 +130,16 @@ def get_rank(row):
             return ''
     else:
         return row
+
+def get_description(row):
+    if isinstance(row, list):
+        if len(row)>0:
+            return row
+        else:
+            return np.nan
+    else:
+        return row
+
 
 def text_processing(text):
     # remove punctuation 
