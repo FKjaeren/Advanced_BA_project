@@ -44,8 +44,7 @@ def prepare_data(ratings_df, reviews_df, metadata_df):
 
 def preprocess_data(metadata_df):
     
-    X = metadata_df[['avg_rating','num_ratings', 'category', 'also_buy', 'brand', 'rank',
-       'also_view', 'price','description']]
+    X = metadata_df[['avg_rating','num_ratings', 'category', 'also_buy', 'brand', 'rank','also_view', 'price','description']]
 
     # get category
     X['category'] = X['category'].fillna('')
@@ -88,7 +87,8 @@ def preprocess_data(metadata_df):
     # get number of also_view
     X['also_view'] = X['also_view'].fillna('')
     X['also_view'] = X['also_view'].apply(get_number_also_buy)
-
+    X['description'] = X['description'].apply(get_description)
+    X = X.dropna(axis = 0, subset=['description'])
     X['description'] = X['description'].apply(str)
     X['description'] = X['description'].str.replace('\n', '')
 
@@ -96,10 +96,10 @@ def preprocess_data(metadata_df):
     X['description'] = X['description'].apply(text_processing)
 
     # drop nan's
-    X = X.dropna(axis=0,subset=['avg_rating','num_ratings','category'])
+    X = X.dropna(axis=0,subset=['avg_rating','num_ratings','category','description'])
 
     # get dummies for: category, top_brand
-    X = pd.get_dummies(X, columns=['category','top_brand'])
+    #X = pd.get_dummies(X, columns=['category','top_brand'])
 
     #y = X['avg_rating']
     #X = X.drop(columns=['avg_rating'])
@@ -131,6 +131,16 @@ def get_rank(row):
     else:
         return row
 
+def get_description(row):
+    if isinstance(row, list):
+        if len(row)>0:
+            return row
+        else:
+            return np.nan
+    else:
+        return row
+
+
 def text_processing(text):
     # remove punctuation 
     text = "".join([c for c in text 
@@ -151,9 +161,12 @@ metadata_filepath = 'raw_data/meta_Grocery_and_Gourmet_Food.json'
 raw_ratings, raw_reviews, raw_metadata = load_data(rating_filepath=rating_filepath, review_filepath=review_filepath, metadata_filepath=metadata_filepath)
 
 reviews_df, metadata_df = prepare_data(raw_ratings, raw_reviews, raw_metadata)
+
+reviews_df.to_csv('data/reviews_df.csv',index=False)
+metadata_df.to_csv('data/metadata_df.csv',index=False)
+
 metadata_df_clean = preprocess_data(metadata_df)
 
 #Counter(" ".join(metadata_df_clean["description"]).split()).most_common(1000)
 
-reviews_df.to_csv('data/reviews_df.csv',index=False)
-metadata_df_clean.to_csv('data/metadata_df.csv',index=False)
+metadata_df_clean.to_csv('data/metadata_df_preprocessed.csv',index=False)
