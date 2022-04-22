@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 
-metadata_df = pd.read_csv('data/metadata_df_clean.csv')
+metadata_df = pd.read_csv('data/metadata_df.csv')
 
 y = metadata_df['avg_rating']
 X = metadata_df.drop(columns=['avg_rating'])
