@@ -12,8 +12,6 @@ from nltk.stem import WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
 Stop_Words= _stop_words.ENGLISH_STOP_WORDS
 from bs4 import BeautifulSoup
-from gensim import corpora
-from gensim.models.ldamodel import LdaModel
 
 
 def prepare_data(ratings_df, reviews_df, metadata_df):
