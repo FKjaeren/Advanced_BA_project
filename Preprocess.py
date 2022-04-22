@@ -144,9 +144,9 @@ def text_processing(text):
     text = " ".join([lemmatizer.lemmatize(w) for w in text.split()])
     return text
 
-rating_filepath = 'data/Grocery_and_Gourmet_Food.csv'
-review_filepath = 'data/Grocery_and_Gourmet_Food_5.json' 
-metadata_filepath = 'data/meta_Grocery_and_Gourmet_Food.json'
+rating_filepath = 'raw_data/Grocery_and_Gourmet_Food.csv'
+review_filepath = 'raw_data/Grocery_and_Gourmet_Food_5.json' 
+metadata_filepath = 'raw_data/meta_Grocery_and_Gourmet_Food.json'
 
 raw_ratings, raw_reviews, raw_metadata = load_data(rating_filepath=rating_filepath, review_filepath=review_filepath, metadata_filepath=metadata_filepath)
 
