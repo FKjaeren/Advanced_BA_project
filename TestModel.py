@@ -20,5 +20,3 @@ def print_top_words(model, feature_names, n_top_words):
 counts_feature_names = count_vect_model.get_feature_names()
 n_top_words = 10
 print_top_words(lda_model, counts_feature_names, n_top_words)
-
-metadata_cleaned_df = 
