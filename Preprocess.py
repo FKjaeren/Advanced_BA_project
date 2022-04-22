@@ -32,7 +32,9 @@ def prepare_data(ratings_df, reviews_df, metadata_df):
     ratings_df = ratings_df.drop_duplicates(keep='first')
 
     # group ratings_df and merge with metadata
-    grouped_ratings = ratings_df[['item','rating']].groupby(by='item').agg({'rating':'mean','item':'size'}).rename(columns={'rating':'avg_rating','item':'num_ratings'}).reset_index()
+    grouped_ratings = ratings_df[['item','rating']].groupby(by='item').agg({'rating':['mean','std'],'item':'size'}).rename(columns={'statistics':'avg_rating','item':'num_ratings'}).reset_index()
+    grouped_ratings.columns = ['_'.join(col).strip() if col[1] else col[0] for col in grouped_ratings.columns.values]
+    grouped_ratings = grouped_ratings.rename(columns = {'rating_mean':'avg_rating','rating_std':'std_rating','num_ratings_size':'num_ratings'})
     metadata_df = grouped_ratings.merge(metadata_df, how='outer', left_on='item', right_on='asin')
     metadata_df['item'].fillna(metadata_df['asin'], inplace=True)
     metadata_df = metadata_df.drop(columns=['asin','date','tech1','tech2','fit'])
@@ -44,7 +46,7 @@ def prepare_data(ratings_df, reviews_df, metadata_df):
 
 def preprocess_data(metadata_df):
     
-    X = metadata_df[['avg_rating','num_ratings', 'category', 'also_buy', 'brand', 'rank','also_view', 'price','description']]
+    X = metadata_df[['avg_rating','std_rating','num_ratings', 'category', 'also_buy', 'brand', 'rank','also_view', 'price','description']]
 
     # get category
     X['category'] = X['category'].fillna('')
