@@ -2,8 +2,6 @@ from CreateData import load_data
 import seaborn as sns
 import pandas as pd
 import numpy as np
-from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
 from collections import Counter
 from sklearn.feature_extraction import _stop_words
 import string
@@ -16,8 +14,6 @@ Stop_Words= _stop_words.ENGLISH_STOP_WORDS
 from bs4 import BeautifulSoup
 from gensim import corpora
 from gensim.models.ldamodel import LdaModel
-
-
 
 def prepare_data(ratings_df, reviews_df, metadata_df):
     # create timestamps
@@ -106,9 +102,9 @@ def preprocess_data(metadata_df):
     # get dummies for: category, top_brand
     X = pd.get_dummies(X, columns=['category','top_brand'])
 
-    y = X['avg_rating']
-    X = X.drop(columns=['avg_rating'])
-    return X, y
+    #y = X['avg_rating']
+    #X = X.drop(columns=['avg_rating'])
+    return X
 
 def get_category(row):
     if len(row) > 1:
@@ -154,26 +150,12 @@ review_filepath = 'data/Grocery_and_Gourmet_Food_5.json'
 metadata_filepath = 'data/meta_Grocery_and_Gourmet_Food.json'
 
 raw_ratings, raw_reviews, raw_metadata = load_data(rating_filepath=rating_filepath, review_filepath=review_filepath, metadata_filepath=metadata_filepath)
-#Counter(" ".join(raw_metadata["description_clean"]).split()).most_common(1000)
 
 reviews_df, metadata_df = prepare_data(raw_ratings, raw_reviews, raw_metadata)
-X, y = preprocess_data(metadata_df)
+metadata_df_clean = preprocess_data(metadata_df)
 
+#Counter(" ".join(metadata_df_clean["description"]).split()).most_common(1000)
 
+reviews_df.to_csv('data/reviews_df.csv',index=False)
+metadata_df_clean.to_csv('data/metadata_df.csv',index=False)
 
-# num_lda_topics = 20
-# split ved mellemrum så hver product har ['word1', 'word2', ...]
-# docs = [['word1_doc1', 'word2_doc1',...], ..., ['word1_docn', 'word2_docn',...]]
-# dictionary = corpora.Dictionary(docs)
-# corpus = [dictionary.doc2bow(d) for d in docs]
-# lda = LdaModel(corpus=corpus, id2word=dictionary, num_topics=num_lda_topics, update_every=1, passes=5, alpha='symmetric')
-
-#X = X.drop(columns='price')
-#X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
-
-
-#reg = LinearRegression().fit(X_train, y_train)
-#print(reg.score(X_test, y_test))
-
-# reviews_df.to_csv('data/reviews_df.csv',index=False)
-# metadata_df.to_csv('data/metadata_df.csv',index=False)
