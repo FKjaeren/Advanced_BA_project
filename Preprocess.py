@@ -157,4 +157,3 @@ metadata_df_clean = preprocess_data(metadata_df)
 
 reviews_df.to_csv('data/reviews_df.csv',index=False)
 metadata_df_clean.to_csv('data/metadata_df.csv',index=False)
-
