@@ -11,6 +11,7 @@ set.seed(42)
 
 df = pd.read_csv('data/metadata_df_preprocessed.csv')
 
+
 def get_len(text):
     if text != text:
         return 0
@@ -22,7 +23,8 @@ def get_len(text):
 def train_lda(df, n_topics, text):
     df['message_len'] = df[text].apply(get_len)
     count_vect = CountVectorizer()
-    bow_counts = count_vect.fit_transform(df.dropna(subset=[text])[text].values)
+    #bow_counts = count_vect.fit_transform(df.dropna(subset=[text])[text].values)
+    bow_counts = count_vect.fit_transform(df[text].values)
     print('Vocabulary size = ',len(count_vect.vocabulary_))
 
     lda = LatentDirichletAllocation(n_components=n_topics, max_iter=5,
@@ -59,7 +61,9 @@ for i in range(n_topics):
     lda_list.append('lda'+str(i+1))
 X_lda_df = pd.DataFrame(X_lda, columns = lda_list)
 
+X_lda_df_both = df.merge(X_lda_df, left_index=True, right_index=True)
 X_lda_df.to_csv('data/lda_data_df.csv',index=False)
+X_lda_df_both.to_csv('data/lda_and_preprocessed_df.csv', index = False)
 today = date.today()
 
 filename = 'models/lda_model'+str(today)+'.sav'
