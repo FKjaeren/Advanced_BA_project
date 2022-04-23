@@ -1,11 +1,10 @@
-from numpy import argmin
+import numpy as np
 import pandas as pd
-import random
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import r2_score
 from sklearn.metrics import explained_variance_score
-# 9 most popular regression models
+# 8 most popular regression models
 from sklearn.linear_model import LinearRegression
 from xgboost.sklearn import XGBRegressor
 from catboost import CatBoostRegressor
@@ -17,7 +16,7 @@ from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.svm import SVR
 
 # set random seed
-random.seed(42)
+np.random.seed(42)
 
 # load data
 df = pd.read_csv('data/lda_and_preprocessed_df.csv')
@@ -70,7 +69,6 @@ def train_regression_models(X_train, X_test, y_train, y_test):
     print("R2 ", r2_catboost_regressor)
     print("Explained variance ", var_catboost_regressor)
     print("----------------------")
-    # slå noget fra her
 
     # Stochastic Gradient Descent Regression
     sgd_regressor = SGDRegressor().fit(X_train, y_train)
@@ -85,18 +83,18 @@ def train_regression_models(X_train, X_test, y_train, y_test):
     print("Explained variance ", var_sgd_regressor)
     print("----------------------")
 
-    # Kernel Ridge Regression
-    kernel_rigde = KernelRidge().fit(X_train, y_train)
-    y_kernel_rigde = kernel_rigde.predict(X_test)
-    MAE_kernel_rigde = mean_absolute_error(y_test, y_kernel_rigde)
-    r2_kernel_rigde = r2_score(y_test, y_kernel_rigde)
-    var_kernel_rigde = explained_variance_score(y_test, y_kernel_rigde)
-    print("----------------------")
-    print("Kernel Ridge Regression: ")
-    print("MAE ", MAE_kernel_rigde)
-    print("R2 ", r2_kernel_rigde)
-    print("Explained variance ", var_kernel_rigde)
-    print("----------------------")
+    # # Kernel Ridge Regression
+    # kernel_rigde = KernelRidge().fit(X_train, y_train)
+    # y_kernel_rigde = kernel_rigde.predict(X_test)
+    # MAE_kernel_rigde = mean_absolute_error(y_test, y_kernel_rigde)
+    # r2_kernel_rigde = r2_score(y_test, y_kernel_rigde)
+    # var_kernel_rigde = explained_variance_score(y_test, y_kernel_rigde)
+    # print("----------------------")
+    # print("Kernel Ridge Regression: ")
+    # print("MAE ", MAE_kernel_rigde)
+    # print("R2 ", r2_kernel_rigde)
+    # print("Explained variance ", var_kernel_rigde)
+    # print("----------------------")
 
     # Elastic Net Regression
     elastic_net = ElasticNet().fit(X_train, y_train)
@@ -137,24 +135,11 @@ def train_regression_models(X_train, X_test, y_train, y_test):
     print("Explained variance ", var_gb_regressor)
     print("----------------------")
 
-    # Support Vector Machine
-    svr = SVR.fit(X_train, y_train)
-    y_svr = svr.predict(X_test)
-    MAE_svr = mean_absolute_error(y_test, y_svr)
-    r2_svr = r2_score(y_test, y_svr)
-    var_svr = explained_variance_score(y_test, y_svr)
-    print("----------------------")
-    print("Support Vector Machine: ")
-    print("MAE ", MAE_svr)
-    print("R2 ", r2_svr)
-    print("Explained variance ", var_svr)
-    print("----------------------")
-
     MAEs = [MAE_linear_regression, MAE_xgb_regressor, MAE_catboost_regressor, MAE_sgd_regressor,
-            MAE_kernel_rigde, MAE_elastic_net, MAE_bayesian_ridge, MAE_gb_regressor, MAE_svr]
-    models = [linear_regression, xgb_regressor, catboost_regressor, sgd_regressor, kernel_rigde, elastic_net, 
-            bayesian_ridge, gb_regressor, svr]
-    best_idx = argmin(MAEs)
+            MAE_elastic_net, MAE_bayesian_ridge, MAE_gb_regressor]
+    models = [linear_regression, xgb_regressor, catboost_regressor, sgd_regressor, elastic_net, 
+            bayesian_ridge, gb_regressor]
+    best_idx = np.argmin(MAEs)
 
     return models[best_idx]
 
