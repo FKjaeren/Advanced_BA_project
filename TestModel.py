@@ -2,10 +2,10 @@ import pickle
 import numpy as np
 import pandas as pd
 
-filename = 'models/lda_model2022-04-22.sav'
+filename = 'models/lda_model2022-04-23.sav'
 lda_model = pickle.load(open(filename, 'rb'))
 
-filename = 'models/count_vect_model2022-04-22.sav'
+filename = 'models/count_vect_model2022-04-23.sav'
 count_vect_model = pickle.load(open(filename, 'rb'))
 
 def print_top_words(model, feature_names, n_top_words):

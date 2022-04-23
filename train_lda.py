@@ -6,7 +6,11 @@ import numpy as np
 import pickle
 from datetime import date
 
+# set random seed
+set.seed(42)
+
 df = pd.read_csv('data/metadata_df_preprocessed.csv')
+
 
 def get_len(text):
     if text != text:
@@ -19,22 +23,19 @@ def get_len(text):
 def train_lda(df, n_topics, text):
     df['message_len'] = df[text].apply(get_len)
     count_vect = CountVectorizer()
-    bow_counts = count_vect.fit_transform(df.dropna(subset=[text])[text].values)
+    #bow_counts = count_vect.fit_transform(df.dropna(subset=[text])[text].values)
+    bow_counts = count_vect.fit_transform(df[text].values)
     print('Vocabulary size = ',len(count_vect.vocabulary_))
 
     lda = LatentDirichletAllocation(n_components=n_topics, max_iter=5,
                                 learning_method='online',
-                                learning_offset=50.,
-                                random_state=0)
-
-
-    rs = 42 # reproducible results, set to None for random
+                                learning_offset=50.)
 
     X_len = df['message_len'].values
     print(X_len)
     X_len = X_len.reshape(-1, 1) # Since we it is single feature
     X_bow_counts = bow_counts
-    #(X_len_train, X_len_test, X_bow_counts_train, X_bow_counts_test) = train_test_split(X_len[X_len!=0], X_bow_counts, test_size=0.2, random_state=rs)
+    #(X_len_train, X_len_test, X_bow_counts_train, X_bow_counts_test) = train_test_split(X_len[X_len!=0], X_bow_counts, test_size=0.2)
 
     X_lda = lda.fit_transform(X_bow_counts)
     return X_lda, lda, count_vect
@@ -60,7 +61,9 @@ for i in range(n_topics):
     lda_list.append('lda'+str(i+1))
 X_lda_df = pd.DataFrame(X_lda, columns = lda_list)
 
+X_lda_df_both = df.merge(X_lda_df, left_index=True, right_index=True)
 X_lda_df.to_csv('data/lda_data_df.csv',index=False)
+X_lda_df_both.to_csv('data/lda_and_preprocessed_df.csv', index = False)
 today = date.today()
 
 filename = 'models/lda_model'+str(today)+'.sav'
