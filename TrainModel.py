@@ -1,19 +1,17 @@
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_error
-from sklearn.metrics import r2_score
-from sklearn.metrics import explained_variance_score
+from sklearn.metrics import mean_absolute_error, r2_score, explained_variance_score
 # 8 most popular regression models
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, ElasticNet, BayesianRidge, SGDRegressor
 from xgboost.sklearn import XGBRegressor
 from catboost import CatBoostRegressor
-from sklearn.linear_model import SGDRegressor
 from sklearn.kernel_ridge import KernelRidge
-from sklearn.linear_model import ElasticNet
-from sklearn.linear_model import BayesianRidge
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.svm import SVR
+import pickle
+from datetime import date
+
 
 # set random seed
 np.random.seed(42)
@@ -145,3 +143,15 @@ def train_regression_models(X_train, X_test, y_train, y_test):
 
 # train models
 model = train_regression_models(X_train, X_test, y_train, y_test)
+
+predictions = model.predict(X_test)
+
+print("The predictions using the best performing models are: ", predictions)
+print("The true values are: ", y_test)
+print("This gives the difference between predictions and true values: ", predictions-y_test)
+print("The MAE of the model is: ", mean_absolute_error(y_test, predictions))
+
+today = date.today()
+
+filename = 'models/best_performing_model_'+str(today)+'.sav'
+pickle.dump(model, open(filename, 'wb'))
