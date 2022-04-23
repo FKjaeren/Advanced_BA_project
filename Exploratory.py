@@ -67,13 +67,13 @@ df_cat_low_avg_rating[['category','avg_rating','num_ratings','rank','price']]
 # Save dataframes for 3 categories
 category = 'Beverages'
 df_beverages = df[df['category']==category]
-df_beverages.to_csv('data/df_beverages.csv')
+df_beverages.to_csv('data/df_beverages.csv',index=False)
 
 category = 'Candy & Chocolate'
 df_candy_chocolate = df[df['category']==category]
-df_candy_chocolate.to_csv('data/df_candy_chocolate.csv')
+df_candy_chocolate.to_csv('data/df_candy_chocolate.csv',index=False)
 
 category = 'Snack Foods'
 df_snacks = df[df['category']==category]
-df_snacks.to_csv('data/df_snacks.csv')
+df_snacks.to_csv('data/df_snacks.csv',index=False)
 

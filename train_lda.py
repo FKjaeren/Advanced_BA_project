@@ -6,12 +6,10 @@ import numpy as np
 import pickle
 from datetime import date
 
-# set random seed
+# Set random seed
 set.seed(42)
 
-df = pd.read_csv('data/metadata_df_preprocessed.csv')
-
-
+#%% Functions 
 def get_len(text):
     if text != text:
         return 0
@@ -40,9 +38,6 @@ def train_lda(df, n_topics, text):
     X_lda = lda.fit_transform(X_bow_counts)
     return X_lda, lda, count_vect
 
-n_topics = 10
-X_lda, lda, count_vect = train_lda(df = df, n_topics=n_topics, text = 'description')
-
 def print_top_words(model, feature_names, n_top_words):
     norm = model.components_.sum(axis=1)[:, np.newaxis]
     for topic_idx, topic in enumerate(model.components_):
@@ -52,6 +47,17 @@ def print_top_words(model, feature_names, n_top_words):
             print("{:.3f}".format(topic[i] / norm[topic_idx][0]) 
                   + '\t' + feature_names[i])
 
+#%% RUN LDA
+
+# Get data 
+category = 'beverages' # select between 'beverages', 'candy_chocolate', 'snacks', 'all'
+path = 'data/df'+'_'+category+'.csv' # select between 'data/df_beverages.csv', 'data/df_candy_chocolate.csv', 'data/df_snacks.csv' or metadata_df_preprocessed.csv'
+df = pd.read_csv(path)
+
+n_topics = 10 # number of topics
+X_lda, lda, count_vect= train_lda(df = df, n_topics=n_topics, text = 'description')
+
+# print top words from lda model 
 print("\nTopics in LDA model:")
 counts_feature_names = count_vect.get_feature_names()
 n_top_words = 10
@@ -61,13 +67,36 @@ for i in range(n_topics):
     lda_list.append('lda'+str(i+1))
 X_lda_df = pd.DataFrame(X_lda, columns = lda_list)
 
-X_lda_df_both = df.merge(X_lda_df, left_index=True, right_index=True)
-X_lda_df.to_csv('data/lda_data_df.csv',index=False)
-X_lda_df_both.to_csv('data/lda_and_preprocessed_df.csv', index = False)
+# Merge df with lda 
+df_with_lda = df.merge(X_lda_df, left_index=True, right_index=True)
+
+# Save merged data + model
 today = date.today()
+if category == 'beverages':
+    df_with_lda.to_csv('data/df_beverages_with_lda.csv',index=False)
+    filename = 'models/lda_model_beverages'+str(today)+'.sav'
+    pickle.dump(lda, open(filename, 'wb'))
+    filename = 'models/count_vect_model_beverages'+str(today)+'.sav'
+    pickle.dump(count_vect, open(filename, 'wb'))
+elif category == 'candy_chocolate':
+    df_with_lda.to_csv('data/df_candy_chocolate_with_lda.csv',index=False)
+    filename = 'models/lda_model_candy_chocolate'+str(today)+'.sav'
+    pickle.dump(lda, open(filename, 'wb'))
+    filename = 'models/count_vect_model_candy_chocolate'+str(today)+'.sav'
+    pickle.dump(count_vect, open(filename, 'wb'))
+elif category == 'snacks':
+    df_with_lda.to_csv('data/df_snacks_with_lda.csv',index=False)
+    filename = 'models/lda_model_candy_snacks'+str(today)+'.sav'
+    pickle.dump(lda, open(filename, 'wb'))
+    filename = 'models/count_vect_model_snacks'+str(today)+'.sav'
+    pickle.dump(count_vect, open(filename, 'wb'))
+elif category == 'all':
+    df_with_lda.to_csv('data/df_with_lda.csv',index=False)
+    filename = 'models/lda_model+str(today)'+'.sav'
+    pickle.dump(lda, open(filename, 'wb'))
+    filename = 'models/count_vect_model'+str(today)+'.sav'
+    pickle.dump(count_vect, open(filename, 'wb'))
+else:
+    print('specify another category')
 
-filename = 'models/lda_model'+str(today)+'.sav'
-pickle.dump(lda, open(filename, 'wb'))
-
-filename = 'models/count_vect_model'+str(today)+'.sav'
-pickle.dump(count_vect, open(filename, 'wb'))
+# %%
