@@ -1,17 +1,162 @@
+from numpy import argmin
 import pandas as pd
-from sklearn.linear_model import LinearRegression
+import random
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import r2_score
+from sklearn.metrics import explained_variance_score
+# 9 most popular regression models
+from sklearn.linear_model import LinearRegression
+from xgboost.sklearn import XGBRegressor
+from catboost import CatBoostRegressor
+from sklearn.linear_model import SGDRegressor
+from sklearn.kernel_ridge import KernelRidge
+from sklearn.linear_model import ElasticNet
+from sklearn.linear_model import BayesianRidge
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.svm import SVR
 
-metadata_df = pd.read_csv('data/metadata_df_preprocessed.csv')
-metadata_df = pd.get_dummies(metadata_df, columns=['category','top_brand'])
-metadata_df = metadata_df.drop(columns=['description'])
+# set random seed
+random.seed(42)
 
+# load data
+df = pd.read_csv('data/lda_and_preprocessed_df.csv')
+# get dummies and drop description
+df = pd.get_dummies(df, columns=['category','top_brand'])
+df = df.drop(columns=['description','std_rating'])
+df = df.dropna()
 
-y = metadata_df['avg_rating']
-X = metadata_df.drop(columns=['avg_rating'])
+# prepare for training
+y = df['avg_rating']
+X = df.drop(columns=['avg_rating'])
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+def train_regression_models(X_train, X_test, y_train, y_test):
+    # Linear Regression
+    linear_regression = LinearRegression().fit(X_train, y_train)
+    y_linear_regression = linear_regression.predict(X_test)
+    MAE_linear_regression = mean_absolute_error(y_test, y_linear_regression)
+    r2_linear_regression = r2_score(y_test, y_linear_regression)
+    var_linear_regression = explained_variance_score(y_test, y_linear_regression)
+    print("----------------------")
+    print("Linear Regression: ")
+    print("MAE ", MAE_linear_regression)
+    print("R2 ", r2_linear_regression)
+    print("Explained variance ", var_linear_regression)
+    print("----------------------")
 
+    # XGBoost Regressor
+    xgb_regressor = XGBRegressor().fit(X_train, y_train)
+    y_xgb_regressor = xgb_regressor.predict(X_test)
+    MAE_xgb_regressor = mean_absolute_error(y_test, y_xgb_regressor)
+    r2_xgb_regressor = r2_score(y_test, y_xgb_regressor)
+    var_xgb_regressor = explained_variance_score(y_test, y_xgb_regressor)
+    print("----------------------")
+    print("XGBoost Regressor: ")
+    print("MAE ", MAE_xgb_regressor)
+    print("R2 ", r2_xgb_regressor)
+    print("Explained variance ", var_xgb_regressor)
+    print("----------------------")
 
-reg = LinearRegression().fit(X_train, y_train)
-print(reg.score(X_test, y_test))
+    # CatBoost Regressor
+    catboost_regressor = CatBoostRegressor(allow_writing_files=False).fit(X_train, y_train, logging_level='Silent')
+    y_catboost_regressor = catboost_regressor.predict(X_test)
+    MAE_catboost_regressor = mean_absolute_error(y_test, y_catboost_regressor)
+    r2_catboost_regressor = r2_score(y_test, y_catboost_regressor)
+    var_catboost_regressor = explained_variance_score(y_test, y_catboost_regressor)
+    print("----------------------")
+    print("CatBoost Regressor: ")
+    print("MAE ", MAE_catboost_regressor)
+    print("R2 ", r2_catboost_regressor)
+    print("Explained variance ", var_catboost_regressor)
+    print("----------------------")
+    # slå noget fra her
+
+    # Stochastic Gradient Descent Regression
+    sgd_regressor = SGDRegressor().fit(X_train, y_train)
+    y_sgd_regressor = sgd_regressor.predict(X_test)
+    MAE_sgd_regressor = mean_absolute_error(y_test, y_sgd_regressor)
+    r2_sgd_regressor = r2_score(y_test, y_sgd_regressor)
+    var_sgd_regressor = explained_variance_score(y_test, y_sgd_regressor)
+    print("----------------------")
+    print("Stochastic Gradient Descent Regression: ")
+    print("MAE ", MAE_sgd_regressor)
+    print("R2 ", r2_sgd_regressor)
+    print("Explained variance ", var_sgd_regressor)
+    print("----------------------")
+
+    # Kernel Ridge Regression
+    kernel_rigde = KernelRidge().fit(X_train, y_train)
+    y_kernel_rigde = kernel_rigde.predict(X_test)
+    MAE_kernel_rigde = mean_absolute_error(y_test, y_kernel_rigde)
+    r2_kernel_rigde = r2_score(y_test, y_kernel_rigde)
+    var_kernel_rigde = explained_variance_score(y_test, y_kernel_rigde)
+    print("----------------------")
+    print("Kernel Ridge Regression: ")
+    print("MAE ", MAE_kernel_rigde)
+    print("R2 ", r2_kernel_rigde)
+    print("Explained variance ", var_kernel_rigde)
+    print("----------------------")
+
+    # Elastic Net Regression
+    elastic_net = ElasticNet().fit(X_train, y_train)
+    y_elastic_net = elastic_net.predict(X_test)
+    MAE_elastic_net = mean_absolute_error(y_test, y_elastic_net)
+    r2_elastic_net = r2_score(y_test, y_elastic_net)
+    var_elastic_net = explained_variance_score(y_test, y_elastic_net)
+    print("----------------------")
+    print("Elastic Net Regression: ")
+    print("MAE ", MAE_elastic_net)
+    print("R2 ", r2_elastic_net)
+    print("Explained variance ", var_elastic_net)
+    print("----------------------")
+
+    # Bayesian Ridge Regression
+    bayesian_ridge = BayesianRidge().fit(X_train, y_train)
+    y_bayesian_ridge = bayesian_ridge.predict(X_test)
+    MAE_bayesian_ridge = mean_absolute_error(y_test, y_bayesian_ridge)
+    r2_bayesian_ridge = r2_score(y_test, y_bayesian_ridge)
+    var_bayesian_ridge = explained_variance_score(y_test, y_bayesian_ridge)
+    print("----------------------")
+    print("Bayesian Ridge Regression: ")
+    print("MAE ", MAE_bayesian_ridge)
+    print("R2 ", r2_bayesian_ridge)
+    print("Explained variance ", var_bayesian_ridge)
+    print("----------------------")
+
+    # Gradient Boosting Regression
+    gb_regressor = GradientBoostingRegressor().fit(X_train, y_train)
+    y_gb_regressor = gb_regressor.predict(X_test)
+    MAE_gb_regressor = mean_absolute_error(y_test, y_gb_regressor)
+    r2_gb_regressor = r2_score(y_test, y_gb_regressor)
+    var_gb_regressor = explained_variance_score(y_test, y_gb_regressor)
+    print("----------------------")
+    print("Gradient Boosting Regression: ")
+    print("MAE ", MAE_gb_regressor)
+    print("R2 ", r2_gb_regressor)
+    print("Explained variance ", var_gb_regressor)
+    print("----------------------")
+
+    # Support Vector Machine
+    svr = SVR.fit(X_train, y_train)
+    y_svr = svr.predict(X_test)
+    MAE_svr = mean_absolute_error(y_test, y_svr)
+    r2_svr = r2_score(y_test, y_svr)
+    var_svr = explained_variance_score(y_test, y_svr)
+    print("----------------------")
+    print("Support Vector Machine: ")
+    print("MAE ", MAE_svr)
+    print("R2 ", r2_svr)
+    print("Explained variance ", var_svr)
+    print("----------------------")
+
+    MAEs = [MAE_linear_regression, MAE_xgb_regressor, MAE_catboost_regressor, MAE_sgd_regressor,
+            MAE_kernel_rigde, MAE_elastic_net, MAE_bayesian_ridge, MAE_gb_regressor, MAE_svr]
+    models = [linear_regression, xgb_regressor, catboost_regressor, sgd_regressor, kernel_rigde, elastic_net, 
+            bayesian_ridge, gb_regressor, svr]
+    best_idx = argmin(MAEs)
+
+    return models[best_idx]
+
+# train models
+model = train_regression_models(X_train, X_test, y_train, y_test)
