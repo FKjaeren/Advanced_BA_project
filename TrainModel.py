@@ -17,10 +17,19 @@ from datetime import date
 np.random.seed(42)
 
 # load data
-df = pd.read_csv('data/lda_and_preprocessed_df.csv')
-# get dummies and drop description
-df = pd.get_dummies(df, columns=['category','top_brand'])
-df = df.drop(columns=['description','std_rating'])
+category = 'beverages'
+if category == 'all':
+        # load data 
+        df = pd.read_csv('data/lda_and_preprocessed_df.csv')
+        # get dummies and drop description
+        df = pd.get_dummies(df, columns=['category','top_brand'])
+        df = df.drop(columns=['description','std_rating'])
+else:
+        # load data 
+        df = pd.read_csv('data/df_'+category+'_with_lda.csv')
+        # get dummies and drop description
+        df = pd.get_dummies(df, columns=['top_brand'])
+        df = df.drop(columns=['category','description','std_rating'])
 df = df.dropna()
 
 # prepare for training
@@ -153,5 +162,9 @@ print("The MAE of the model is: ", mean_absolute_error(y_test, predictions))
 
 today = date.today()
 
-filename = 'models/best_performing_model_'+str(today)+'.sav'
-pickle.dump(model, open(filename, 'wb'))
+if category == 'all':
+        filename = 'models/best_performing_model_'+str(today)+'.sav'
+        pickle.dump(model, open(filename, 'wb'))
+else:
+        filename = 'models/best_performing_model_'+category+'_'+str(today)+'.sav'
+        pickle.dump(model, open(filename, 'wb'))
