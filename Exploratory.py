@@ -3,7 +3,9 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# Read data 
+#%% Investigate categories 
+
+# lead data 
 df = pd.read_csv('data/metadata_df_preprocessed.csv')
 
 # Number of products in each category
@@ -38,23 +40,25 @@ fig.show()
 categories_union = list(set().union(categories,df_num_ratings.loc[0:top,'category'])) # list of categories shown in figure 1 and 2
 df_mean_avg_rating = df[df['category'].isin(categories_union)].groupby('category').median(['avg_rating']).sort_values(by='avg_rating',ascending=False)
 categories_union = df_mean_avg_rating.index.to_list()
-f3 = plt.figure(3)
+plt.figure(2)
 sns.boxplot(x = 'category', y = 'avg_rating', data = df[df['category'].isin(categories_union)], order = categories_union)
 plt.xticks(rotation=90)
 plt.tight_layout()
-f3.show()
+plt.show()
 
+#%% Investigate specific category 
+  
 # Select category 
 category = 'Candy & Chocolate'
 df_cat = df[df['category']==category]
-numeric_features = ['avg_rating','std_rating','num_ratings','also_buy','price']
+numeric_features = ['avg_rating','std_rating','num_ratings','also_buy', 'also_view','price']
 
 # Pairs plot of products in chosen category 
-# f4 = plt.figure(4)
-# sns.pairplot(df_cat[numeric_features])
-# plt.xticks(rotation=90)
-# plt.tight_layout
-# f4.show()
+plt.figure()
+sns.pairplot(df_cat[numeric_features],height=1.1, aspect=1.3)
+plt.xticks(rotation=90)
+plt.tight_layout
+plt.show()
 # Observation biased data as no badly rated products have many ratings.
 
 # Products that sales a lot but has low average rating
@@ -64,16 +68,7 @@ df_cat_low_avg_rating = df_cat_low_avg_rating[df_cat_low_avg_rating['num_ratings
 df_cat_low_avg_rating.shape
 df_cat_low_avg_rating[['category','avg_rating','num_ratings','rank','price']]
 
-# Save dataframes for 3 categories
-category = 'Beverages'
-df_beverages = df[df['category']==category]
-df_beverages.to_csv('data/df_beverages.csv',index=False)
+# Save dataframe for category 
+df_cat.to_csv('data/df_'+category+'.csv',index=False)
 
-category = 'Candy & Chocolate'
-df_candy_chocolate = df[df['category']==category]
-df_candy_chocolate.to_csv('data/df_candy_chocolate.csv',index=False)
-
-category = 'Snack Foods'
-df_snacks = df[df['category']==category]
-df_snacks.to_csv('data/df_snacks.csv',index=False)
 
