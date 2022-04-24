@@ -6,8 +6,8 @@ import numpy as np
 import pickle
 from datetime import date
 
-# Set random seed
-set.seed(42)
+# set random seed
+np.random.seed(42)
 
 #%% Functions 
 def get_len(text):
@@ -49,9 +49,12 @@ def print_top_words(model, feature_names, n_top_words):
 
 #%% RUN LDA
 
-# Get data 
-category = 'beverages' # select between 'beverages', 'candy_chocolate', 'snacks', 'all'
-path = 'data/df'+'_'+category+'.csv' # select between 'data/df_beverages.csv', 'data/df_candy_chocolate.csv', 'data/df_snacks.csv' or metadata_df_preprocessed.csv'
+# get data
+category = 'Candy & Chocolate' # 'all' if you want to select data with all categories 
+if category != all:
+    path = 'data/df'+'_'+category+'.csv'
+else:
+    path = 'data/metadata_df_preprocessed.csv'
 df = pd.read_csv(path)
 
 n_topics = 10 # number of topics
@@ -72,31 +75,9 @@ df_with_lda = df.merge(X_lda_df, left_index=True, right_index=True)
 
 # Save merged data + model
 today = date.today()
-if category == 'beverages':
-    df_with_lda.to_csv('data/df_beverages_with_lda.csv',index=False)
-    filename = 'models/lda_model_beverages'+str(today)+'.sav'
-    pickle.dump(lda, open(filename, 'wb'))
-    filename = 'models/count_vect_model_beverages'+str(today)+'.sav'
-    pickle.dump(count_vect, open(filename, 'wb'))
-elif category == 'candy_chocolate':
-    df_with_lda.to_csv('data/df_candy_chocolate_with_lda.csv',index=False)
-    filename = 'models/lda_model_candy_chocolate'+str(today)+'.sav'
-    pickle.dump(lda, open(filename, 'wb'))
-    filename = 'models/count_vect_model_candy_chocolate'+str(today)+'.sav'
-    pickle.dump(count_vect, open(filename, 'wb'))
-elif category == 'snacks':
-    df_with_lda.to_csv('data/df_snacks_with_lda.csv',index=False)
-    filename = 'models/lda_model_candy_snacks'+str(today)+'.sav'
-    pickle.dump(lda, open(filename, 'wb'))
-    filename = 'models/count_vect_model_snacks'+str(today)+'.sav'
-    pickle.dump(count_vect, open(filename, 'wb'))
-elif category == 'all':
-    df_with_lda.to_csv('data/df_with_lda.csv',index=False)
-    filename = 'models/lda_model+str(today)'+'.sav'
-    pickle.dump(lda, open(filename, 'wb'))
-    filename = 'models/count_vect_model'+str(today)+'.sav'
-    pickle.dump(count_vect, open(filename, 'wb'))
-else:
-    print('specify another category')
+df_with_lda.to_csv('data/df_'+category+'_with_lda.csv',index=False)
+filename = 'models/lda_model_'+category+'_'+str(today)+'.sav'
+pickle.dump(lda, open(filename, 'wb'))
+filename = 'models/count_vect_model'+category+'_'+str(today)+'.sav'
+pickle.dump(count_vect, open(filename, 'wb'))
 
-# %%
