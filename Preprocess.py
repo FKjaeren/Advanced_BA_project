@@ -1,56 +1,11 @@
-from CreateData import load_data
 import seaborn as sns
 import pandas as pd
 import numpy as np
-from collections import Counter
-from sklearn.feature_extraction import _stop_words
-import string
-import nltk
-nltk.download('wordnet')
-nltk.download('punkt')
-from nltk.stem import WordNetLemmatizer
-lemmatizer = WordNetLemmatizer()
-Stop_Words= _stop_words.ENGLISH_STOP_WORDS
-from bs4 import BeautifulSoup
-
-
-def prepare_data(ratings_df, reviews_df, metadata_df):
-    # create timestamps
-    ratings_df['timestamp'] = pd.to_datetime(ratings_df['timestamp'], origin = 'unix', unit = 's')
-    reviews_df['timestamp'] = pd.to_datetime(reviews_df['unixReviewTime'], origin = 'unix', unit = 's')
-    metadata_df['timestamp'] = pd.to_datetime(metadata_df['date'].apply(str), format = '%B %d, %Y', errors='coerce')
-
-    # drop columns in reviews
-    reviews_df = reviews_df.drop(columns=['unixReviewTime','reviewTime','reviewerName','vote','image','style','verified'])
-
-    # drop columns in metadata
-    metadata_df = metadata_df.drop(columns=['imageURL','imageURLHighRes'])
-    
-    # drop na's and duplicates
-    reviews_df = reviews_df.dropna()
-    reviews_df = reviews_df.drop_duplicates(keep='first')
-    ratings_df = ratings_df.drop_duplicates(keep='first')
-
-    # group ratings_df and merge with metadata
-    grouped_ratings = ratings_df[['item','rating']].groupby(by='item').agg({'rating':['mean','std'],'item':'size'}).rename(columns={'statistics':'avg_rating','item':'num_ratings'}).reset_index()
-    grouped_ratings.columns = ['_'.join(col).strip() if col[1] else col[0] for col in grouped_ratings.columns.values]
-    grouped_ratings = grouped_ratings.rename(columns = {'rating_mean':'avg_rating','rating_std':'std_rating','num_ratings_size':'num_ratings'})
-    metadata_df = grouped_ratings.merge(metadata_df, how='outer', left_on='item', right_on='asin')
-    metadata_df['item'].fillna(metadata_df['asin'], inplace=True)
-    metadata_df = metadata_df.drop(columns=['asin','date','tech1','tech2','fit'])
-
-    # preprocess price
-    metadata_df['price'] =  pd.to_numeric(metadata_df['price'].str.replace('$',''), errors='coerce')
-
-    return reviews_df, metadata_df
 
 def preprocess_data(metadata_df):
     
     X = metadata_df[['avg_rating','std_rating','num_ratings', 'category', 'also_buy', 'brand', 'rank','also_view', 'price','description']]
 
-    # get category
-    X['category'] = X['category'].fillna('')
-    X['category'] = X['category'].apply(get_category)
 
     # get number of also_buy
     X['also_buy'] = X['also_buy'].fillna('')
@@ -59,7 +14,7 @@ def preprocess_data(metadata_df):
     # get top 10 brands
     top = 10
     X['brand'] = X['brand'].str.replace('Unknown','')
-    brands = X['brand'].value_counts().sort_values(ascending=False).index[1:(top+1)].to_list()
+    brands = X['brand'].value_counts().sort_values(ascending=False).index[0:(top)].to_list()
     X['top_brand'] = X['brand'].apply(lambda row: get_brand(row, brands))
     X = X.drop(columns=['brand'])
 
@@ -89,13 +44,6 @@ def preprocess_data(metadata_df):
     # get number of also_view
     X['also_view'] = X['also_view'].fillna('')
     X['also_view'] = X['also_view'].apply(get_number_also_buy)
-    X['description'] = X['description'].apply(get_description)
-    X = X.dropna(axis = 0, subset=['description'])
-    X['description'] = X['description'].apply(str)
-    X['description'] = X['description'].str.replace('\n', '')
-
-    X['description'] = X[['description']].applymap(lambda text: BeautifulSoup(text, 'html.parser').get_text())
-    X['description'] = X['description'].apply(text_processing)
 
     # drop nan's
     X = X.dropna(axis=0,subset=['avg_rating','num_ratings','category','description'])
@@ -107,12 +55,6 @@ def preprocess_data(metadata_df):
     #X = X.drop(columns=['avg_rating'])
     return X
 
-def get_category(row):
-    if len(row) > 1:
-        category = row[1]
-    else:
-        category = row
-    return category
 
 def get_number_also_buy(row):
     number = len(row)
@@ -122,7 +64,7 @@ def get_brand(row, brands):
     if row in brands:
         return row
     else:
-        return ''
+        return 'Other'
 
 def get_rank(row):
     if isinstance(row, list):
@@ -133,45 +75,13 @@ def get_rank(row):
     else:
         return row
 
-def get_description(row):
-    if isinstance(row, list):
-        if len(row)>0:
-            return row
-        else:
-            return np.nan
-    else:
-        return row
-
-
-def text_processing(text):
-    # remove punctuation 
-    text = "".join([c for c in text 
-                    if c not in string.punctuation])
-    # lowercase
-    text = "".join([c.lower() for c in text])
-    # remove stopwords
-    text = " ".join([w for w in text.split() 
-                     if w not in Stop_Words])
-    # stemming / lematizing (optional)
-    text = " ".join([lemmatizer.lemmatize(w) for w in text.split()])
-    return text
-
-rating_filepath = 'raw_data/Grocery_and_Gourmet_Food.csv'
-review_filepath = 'raw_data/Grocery_and_Gourmet_Food_5.json' 
-metadata_filepath = 'raw_data/meta_Grocery_and_Gourmet_Food.json'
-
-raw_ratings, raw_reviews, raw_metadata = load_data(rating_filepath=rating_filepath, review_filepath=review_filepath, metadata_filepath=metadata_filepath)
-
-reviews_df, metadata_df = prepare_data(raw_ratings, raw_reviews, raw_metadata)
-
-reviews_df.to_csv('data/reviews_df.csv',index=False)
-metadata_df.to_csv('data/metadata_df.csv',index=False)
-
+category = 'Candy & Chocolate'
+metadata_df = pd.read_csv('data/df_'+category+'.csv')
 metadata_df_clean = preprocess_data(metadata_df)
 
 #Counter(" ".join(metadata_df_clean["description"]).split()).most_common(1000)
 
-metadata_df_clean.to_csv('data/metadata_df_preprocessed.csv',index=False)
+metadata_df_clean.to_csv('data/metadata_df_preprocessed'+category+'.csv',index=False)
 df = pd.read_csv('data/metadata_df_preprocessed.csv')
 df = df.dropna(subset = ['description'])
-df.to_csv('data/metadata_df_preprocessed.csv',index=False)
+df.to_csv('data/metadata_df_preprocessed'+category+'.csv',index=False)
