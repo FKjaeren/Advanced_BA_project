@@ -61,8 +61,8 @@ def visualize_topics(lda, count_vect, terms_count):
         topic_words = []
         for i in range(terms_count):
             topic_words.append(topic_terms_sorted[i][0])
-            print(','.join( word for word in topic_words))
-            print("")
+            # print(','.join( word for word in topic_words))
+            # print("")
             dict_word_frequency = {}
         for i in range(terms_count):
             dict_word_frequency[topic_terms_sorted[i][0]] = topic_terms_sorted[i][1]

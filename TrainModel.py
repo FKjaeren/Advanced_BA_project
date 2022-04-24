@@ -6,12 +6,10 @@ from sklearn.metrics import mean_absolute_error, r2_score, explained_variance_sc
 from sklearn.linear_model import LinearRegression, ElasticNet, BayesianRidge, SGDRegressor
 from xgboost.sklearn import XGBRegressor
 from catboost import CatBoostRegressor
-from sklearn.kernel_ridge import KernelRidge
 from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.svm import SVR
+from sklearn.model_selection import GridSearchCV
 import pickle
 from datetime import date
-
 
 # set random seed
 np.random.seed(42)
@@ -90,19 +88,6 @@ def train_regression_models(X_train, X_test, y_train, y_test):
     print("Explained variance ", var_sgd_regressor)
     print("----------------------")
 
-    # # Kernel Ridge Regression
-    # kernel_rigde = KernelRidge().fit(X_train, y_train)
-    # y_kernel_rigde = kernel_rigde.predict(X_test)
-    # MAE_kernel_rigde = mean_absolute_error(y_test, y_kernel_rigde)
-    # r2_kernel_rigde = r2_score(y_test, y_kernel_rigde)
-    # var_kernel_rigde = explained_variance_score(y_test, y_kernel_rigde)
-    # print("----------------------")
-    # print("Kernel Ridge Regression: ")
-    # print("MAE ", MAE_kernel_rigde)
-    # print("R2 ", r2_kernel_rigde)
-    # print("Explained variance ", var_kernel_rigde)
-    # print("----------------------")
-
     # Elastic Net Regression
     elastic_net = ElasticNet().fit(X_train, y_train)
     y_elastic_net = elastic_net.predict(X_test)
@@ -146,14 +131,31 @@ def train_regression_models(X_train, X_test, y_train, y_test):
             MAE_elastic_net, MAE_bayesian_ridge, MAE_gb_regressor]
     models = [linear_regression, xgb_regressor, catboost_regressor, sgd_regressor, elastic_net, 
             bayesian_ridge, gb_regressor]
+    names = ['linear_regression', 'xgb_regressor', 'catboost_regressor', 'sgd_regressor', 'elastic_net', 
+            'bayesian_ridge', 'gb_regressor']
     best_idx = np.argmin(MAEs)
 
-    return models[best_idx]
+    return models[best_idx], names[best_idx]
 
-# train models
-model = train_regression_models(X_train, X_test, y_train, y_test)
+def tune_model(model, name, X_train, y_train):
+        if name == 'catboost_regressor':
+                # tune parameters of catboost
+                parameters = {'depth' : [5, 10, 15, 20],
+                                'learning_rate' : [0.01, 0.02, 0.03]}
+                Grid_CBC = GridSearchCV(estimator=model, param_grid=parameters, cv=2, n_jobs=-1, verbose=0)
+                Grid_CBC.fit(X_train, y_train)
+                depth = Grid_CBC.best_params_['depth']
+                learning_rate = Grid_CBC.best_params_['learning_rate']
+                catboost_regressor = CatBoostRegressor(allow_writing_files=False, depth=depth, learning_rate=learning_rate).fit(X_train, y_train, logging_level='Silent')
+        return Grid_CBC.best_params_, catboost_regressor           
 
-predictions = model.predict(X_test)
+
+# train and tune model
+model, name = train_regression_models(X_train, X_test, y_train, y_test)
+params, tuned_model = tune_model(model, name, X_train, y_train)
+
+# validate model
+predictions = tuned_model.predict(X_test)
 
 print("The predictions using the best performing models are: ", predictions)
 print("The true values are: ", y_test)
