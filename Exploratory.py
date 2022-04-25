@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 #%% Investigate categories 
 
 # lead data 
-df = pd.read_csv('data/metadata_df_preprocessed.csv')
+df = pd.read_csv('data/metadata_df.csv')
 
 # Number of products in each category
 def get_category(row, categories):

@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 
 
-
 def prepare_data(ratings_df, reviews_df, metadata_df):
     # create timestamps
     ratings_df['timestamp'] = pd.to_datetime(ratings_df['timestamp'], origin = 'unix', unit = 's')

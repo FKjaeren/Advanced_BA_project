@@ -1,6 +1,8 @@
 import seaborn as sns
 import pandas as pd
 import numpy as np
+import gower
+from sklearn.cluster import DBSCAN
 
 def preprocess_data(metadata_df):
     
@@ -16,7 +18,7 @@ def preprocess_data(metadata_df):
     X['brand'] = X['brand'].str.replace('Unknown','')
     brands = X['brand'].value_counts().sort_values(ascending=False).index[0:(top)].to_list()
     X['top_brand'] = X['brand'].apply(lambda row: get_brand(row, brands))
-    X = X.drop(columns=['brand'])
+    #X = X.drop(columns=['brand'])
 
     # sales rank information
     X['rank'] = X['rank'].apply(get_rank)
@@ -84,4 +86,20 @@ metadata_df_clean = preprocess_data(metadata_df)
 metadata_df_clean.to_csv('data/metadata_df_preprocessed'+category+'.csv',index=False)
 df = pd.read_csv('data/metadata_df_preprocessed'+category+'.csv')
 df = df.dropna(subset = ['description'])
+
+df_subset = df[['avg_rating', 'num_ratings', 'category', 'also_buy', 'rank', 'also_view', 'price', 'description', 'top_brand']]
+
+distance_matrix = gower.gower_matrix(df_subset)
+
+# Configuring the parameters of the clustering algorithm
+dbscan_cluster = DBSCAN(eps=0.3, 
+                        min_samples=2, 
+                        metric="precomputed")
+
+# Fitting the clustering algorithm
+dbscan_cluster.fit(distance_matrix)
+
+# Adding the results to a new column in the dataframe
+df["cluster"] = dbscan_cluster.labels
+
 df.to_csv('data/metadata_df_preprocessed_'+category+'.csv',index=False)
