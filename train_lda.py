@@ -82,7 +82,7 @@ def visualize_topics(lda, count_vect, terms_count):
 # get data
 category = 'Candy & Chocolate' # 'all' if you want to select data with all categories 
 if category != all:
-    path = 'data/df'+'_'+category+'.csv'
+    path = 'data/metadata_df_preprocessed'+'_'+category+'.csv'
 else:
     path = 'data/metadata_df_preprocessed.csv'
 df = pd.read_csv(path)
@@ -140,3 +140,5 @@ pickle.dump(lda, open(filename, 'wb'))
 filename = 'models/count_vect_model'+category+'_'+str(today)+'.sav'
 pickle.dump(count_vect, open(filename, 'wb'))
 
+
+# %%

@@ -82,6 +82,6 @@ metadata_df_clean = preprocess_data(metadata_df)
 #Counter(" ".join(metadata_df_clean["description"]).split()).most_common(1000)
 
 metadata_df_clean.to_csv('data/metadata_df_preprocessed'+category+'.csv',index=False)
-df = pd.read_csv('data/metadata_df_preprocessed.csv')
+df = pd.read_csv('data/metadata_df_preprocessed'+category+'.csv')
 df = df.dropna(subset = ['description'])
-df.to_csv('data/metadata_df_preprocessed'+category+'.csv',index=False)
+df.to_csv('data/metadata_df_preprocessed_'+category+'.csv',index=False)
