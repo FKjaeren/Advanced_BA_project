@@ -93,13 +93,13 @@ distance_matrix = gower.gower_matrix(df_subset)
 
 # Configuring the parameters of the clustering algorithm
 dbscan_cluster = DBSCAN(eps=0.3, 
-                        min_samples=2, 
+                        min_samples=1000, 
                         metric="precomputed")
 
 # Fitting the clustering algorithm
 dbscan_cluster.fit(distance_matrix)
 
 # Adding the results to a new column in the dataframe
-df["cluster"] = dbscan_cluster.labels
+df["cluster"] = dbscan_cluster.labels_
 
 df.to_csv('data/metadata_df_preprocessed_'+category+'.csv',index=False)
