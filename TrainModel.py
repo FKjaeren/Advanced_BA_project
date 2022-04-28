@@ -24,16 +24,22 @@ if category == 'all':
         df = df.drop(columns=['description','std_rating'])
 else:
         # load data 
-        df = pd.read_csv('data/df_'+category+'_with_lda.csv')
+        df_train = pd.read_csv('data/' + category + '/df_train_lda.csv')
+        df_test = pd.read_csv('data/' + category + '/df_test_lda.csv')
         # get dummies and drop description
-        df = pd.get_dummies(df, columns=['top_brand'])
-        df = df.drop(columns=['category','description','std_rating'])
-df = df.dropna()
+
+        # CLUSTERING
+        # df_train = pd.get_dummies(df_train, columns=['top_brand'])
+        df_train = df_train.drop(columns=['brand','category','description','std_rating'])
+        df_test = df_test.drop(columns=['brand','category','description','std_rating'])
+df_train = df_train.dropna()
+df_test = df_test.dropna()
 
 # prepare for training
-y = df['avg_rating']
-X = df.drop(columns=['avg_rating'])
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+y_train = df_train['avg_rating']
+y_test = df_test['avg_rating']
+X_train = df_train.drop(columns=['avg_rating'])
+X_test = df_test.drop(columns=['avg_rating'])
 
 def train_regression_models(X_train, X_test, y_train, y_test):
     # Linear Regression

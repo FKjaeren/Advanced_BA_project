@@ -21,26 +21,42 @@ def get_len(text):
     else:
         return len(text)
 
-def train_lda(df, n_topics, ld, text):
-    df['message_len'] = df[text].apply(get_len)
+# def train_lda(df, n_topics, ld, text):
+#     df['message_len'] = df[text].apply(get_len)
+#     count_vect = CountVectorizer()
+#     #bow_counts = count_vect.fit_transform(df.dropna(subset=[text])[text].values)
+#     bow_counts = count_vect.fit_transform(df[text].values)
+#     print('Vocabulary size = ',len(count_vect.vocabulary_))
+
+#     lda = LatentDirichletAllocation(n_components=n_topics, max_iter=5,
+#                                 learning_method='online',
+#                                 learning_offset=50.,
+#                                 learning_decay=ld)
+
+#     X_len = df['message_len'].values
+#     print(X_len)
+#     X_len = X_len.reshape(-1, 1) # Since we it is single feature
+#     X_bow_counts = bow_counts
+#     #(X_len_train, X_len_test, X_bow_counts_train, X_bow_counts_test) = train_test_split(X_len[X_len!=0], X_bow_counts, test_size=0.2)
+
+#     X_lda = lda.fit_transform(X_bow_counts)
+#     return X_lda, lda, count_vect
+
+def train_lda(df_train, df_test, n_topics, ld, text):
+
     count_vect = CountVectorizer()
-    #bow_counts = count_vect.fit_transform(df.dropna(subset=[text])[text].values)
-    bow_counts = count_vect.fit_transform(df[text].values)
-    print('Vocabulary size = ',len(count_vect.vocabulary_))
+    bow_counts_train = count_vect.fit_transform(df_train[text].values)
+    bow_counts_test = count_vect.transform(df_test[text].values)
 
     lda = LatentDirichletAllocation(n_components=n_topics, max_iter=5,
                                 learning_method='online',
                                 learning_offset=50.,
                                 learning_decay=ld)
 
-    X_len = df['message_len'].values
-    print(X_len)
-    X_len = X_len.reshape(-1, 1) # Since we it is single feature
-    X_bow_counts = bow_counts
-    #(X_len_train, X_len_test, X_bow_counts_train, X_bow_counts_test) = train_test_split(X_len[X_len!=0], X_bow_counts, test_size=0.2)
+    X_train_lda = lda.fit_transform(bow_counts_train)
+    X_test_lda = lda.transform(bow_counts_test)
 
-    X_lda = lda.fit_transform(X_bow_counts)
-    return X_lda, lda, count_vect
+    return X_train_lda, X_test_lda, lda, count_vect
 
 def print_top_words(model, feature_names, n_top_words):
     norm = model.components_.sum(axis=1)[:, np.newaxis]
@@ -82,10 +98,14 @@ def visualize_topics(lda, count_vect, terms_count):
 # get data
 category = 'Candy & Chocolate' # 'all' if you want to select data with all categories 
 if category != all:
-    path = 'data/metadata_df_preprocessed'+'_'+category+'.csv'
+    train_path = 'data/' + category + '/df_train.csv'
+    test_path = 'data/' + category + '/df_test.csv'
+    # path = 'data/metadata_df_preprocessed'+'_'+category+'.csv'
 else:
-    path = 'data/metadata_df_preprocessed.csv'
-df = pd.read_csv(path)
+    train_path = 'data/df_train.csv'
+    test_path = 'data/df_test.csv'
+df_train = pd.read_csv(train_path)
+df_test = pd.read_csv(test_path)
 
 # Options to try with our LDA
 # Beware it will try *all* of the combinations, so it'll take ages
@@ -102,7 +122,7 @@ gridsearch = GridSearchCV(model,
                           n_jobs=-1,
                           verbose=1)
 count_vect = CountVectorizer()
-cv_matrix = count_vect.fit_transform(df['description'].values)
+cv_matrix = count_vect.fit_transform(df_train['description'].values)
 gridsearch.fit(cv_matrix)
 
 ## Save the best model
@@ -114,31 +134,38 @@ print("Best Model's Params: ", gridsearch.best_params_)
 # Train LDA with best params
 n_topics = gridsearch.best_params_['n_components']
 learning_decay = gridsearch.best_params_['learning_decay']
-X_lda, lda, count_vect = train_lda(df, n_topics, learning_decay, 'description')
+
+# Run LDA with tuned parameters
+n_topics = 5
+learning_decay = 0.5
+X_train_lda, X_test_lda, lda, count_vect = train_lda(df_train, df_test, n_topics, learning_decay, 'description')
+# X_lda, lda, count_vect = train_lda(df, n_topics, learning_decay, 'description')
 
 # Visualize topics as wordclouds
 visualize_topics(lda, count_vect, 25)
 
-# print top words from lda model 
-print("\nTopics in LDA model:")
-counts_feature_names = count_vect.get_feature_names()
-n_top_words = 10
-print_top_words(lda, counts_feature_names, n_top_words)
+# # print top words from lda model 
+# print("\nTopics in LDA model:")
+# counts_feature_names = count_vect.get_feature_names()
+# n_top_words = 10
+# print_top_words(lda, counts_feature_names, n_top_words)
+
+
+# Merge df with lda 
 lda_list = []
 for i in range(n_topics):
     lda_list.append('lda'+str(i+1))
-X_lda_df = pd.DataFrame(X_lda, columns = lda_list)
-
-# Merge df with lda 
-df_with_lda = df.merge(X_lda_df, left_index=True, right_index=True)
+X_train_lda_df = pd.DataFrame(X_train_lda, columns = lda_list)
+X_test_lda_df = pd.DataFrame(X_test_lda, columns = lda_list)
+df_train_lda = df_train.merge(X_train_lda_df, left_index=True, right_index=True)
+df_test_lda = df_test.merge(X_test_lda_df, left_index=True, right_index=True)
 
 # Save merged data + model
 today = date.today()
-df_with_lda.to_csv('data/df_'+category+'_with_lda.csv',index=False)
+df_train_lda.to_csv('data/' + category + '/df_train_lda.csv',index=False)
+df_test_lda.to_csv('data/' + category + '/df_test_lda.csv',index=False)
+
 filename = 'models/lda_model_'+category+'_'+str(today)+'.sav'
 pickle.dump(lda, open(filename, 'wb'))
 filename = 'models/count_vect_model'+category+'_'+str(today)+'.sav'
 pickle.dump(count_vect, open(filename, 'wb'))
-
-
-# %%
