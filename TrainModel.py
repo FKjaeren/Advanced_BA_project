@@ -30,8 +30,8 @@ else:
 
         # CLUSTERING
         # df_train = pd.get_dummies(df_train, columns=['top_brand'])
-        df_train = df_train.drop(columns=['brand','category','description','std_rating'])
-        df_test = df_test.drop(columns=['brand','category','description','std_rating'])
+        df_train = df_train.drop(columns=['description','std_rating'])
+        df_test = df_test.drop(columns=['description','std_rating'])
 df_train = df_train.dropna()
 df_test = df_test.dropna()
 
@@ -148,7 +148,7 @@ def tune_model(model, name, X_train, y_train):
                 # tune parameters of catboost
                 parameters = {'depth' : [5, 10, 15, 20],
                                 'learning_rate' : [0.01, 0.02, 0.03]}
-                Grid_CBC = GridSearchCV(estimator=model, param_grid=parameters, cv=2, n_jobs=-1, verbose=0)
+                Grid_CBC = GridSearchCV(estimator=model, param_grid=parameters, cv=5, n_jobs=-1, verbose=0)
                 Grid_CBC.fit(X_train, y_train)
                 depth = Grid_CBC.best_params_['depth']
                 learning_rate = Grid_CBC.best_params_['learning_rate']
@@ -174,5 +174,5 @@ if category == 'all':
         filename = 'models/best_performing_model_'+str(today)+'.sav'
         pickle.dump(model, open(filename, 'wb'))
 else:
-        filename = 'models/best_performing_model_'+category+'_'+str(today)+'.sav'
+        filename = 'models/'+category+'/best_performing_model_'+str(today)+'.sav'
         pickle.dump(model, open(filename, 'wb'))

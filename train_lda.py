@@ -98,8 +98,8 @@ def visualize_topics(lda, count_vect, terms_count):
 # get data
 category = 'Candy & Chocolate' # 'all' if you want to select data with all categories 
 if category != all:
-    train_path = 'data/' + category + '/df_train.csv'
-    test_path = 'data/' + category + '/df_test.csv'
+    train_path = 'data/' + category + '/df_train_preprocessed.csv'
+    test_path = 'data/' + category + '/df_test_preprocessed.csv'
     # path = 'data/metadata_df_preprocessed'+'_'+category+'.csv'
 else:
     train_path = 'data/df_train.csv'
@@ -109,7 +109,7 @@ df_test = pd.read_csv(test_path)
 
 # Options to try with our LDA
 # Beware it will try *all* of the combinations, so it'll take ages
-search_params = {'n_components': [1, 5], 'learning_decay': [.5, .7]}
+search_params = {'n_components': [ 3, 5, 7], 'learning_decay': [ .5, .7, .9]}
 
 # Set up LDA with the options we'll keep static
 model = LatentDirichletAllocation(learning_method='online',
@@ -164,8 +164,10 @@ df_test_lda = df_test.merge(X_test_lda_df, left_index=True, right_index=True)
 today = date.today()
 df_train_lda.to_csv('data/' + category + '/df_train_lda.csv',index=False)
 df_test_lda.to_csv('data/' + category + '/df_test_lda.csv',index=False)
-
-filename = 'models/lda_model_'+category+'_'+str(today)+'.sav'
+#
+filename = 'models/'+category+'lda_model_'+str(today)+'.sav'
 pickle.dump(lda, open(filename, 'wb'))
-filename = 'models/count_vect_model'+category+'_'+str(today)+'.sav'
+filename = 'models/'+category+'count_vect_model_'+str(today)+'.sav'
 pickle.dump(count_vect, open(filename, 'wb'))
+
+# %%
