@@ -218,6 +218,9 @@ df_train['cluster'] = kmeans.labels_
 pca_values_test = pca.transform(df_test_dummy)
 df_test['cluster'] = kmeans.predict(pca_values_test)
 
+df_train = pd.get_dummies(df_train, columns = ['cluster'])
+df_test = pd.get_dummies(df_test, columns = ['cluster'])
+
 #sns.scatterplot('price','num_ratings', hue = 'cluster', data = df_train)
 #plt.show()
 
