@@ -21,27 +21,6 @@ def get_len(text):
     else:
         return len(text)
 
-# def train_lda(df, n_topics, ld, text):
-#     df['message_len'] = df[text].apply(get_len)
-#     count_vect = CountVectorizer()
-#     #bow_counts = count_vect.fit_transform(df.dropna(subset=[text])[text].values)
-#     bow_counts = count_vect.fit_transform(df[text].values)
-#     print('Vocabulary size = ',len(count_vect.vocabulary_))
-
-#     lda = LatentDirichletAllocation(n_components=n_topics, max_iter=5,
-#                                 learning_method='online',
-#                                 learning_offset=50.,
-#                                 learning_decay=ld)
-
-#     X_len = df['message_len'].values
-#     print(X_len)
-#     X_len = X_len.reshape(-1, 1) # Since we it is single feature
-#     X_bow_counts = bow_counts
-#     #(X_len_train, X_len_test, X_bow_counts_train, X_bow_counts_test) = train_test_split(X_len[X_len!=0], X_bow_counts, test_size=0.2)
-
-#     X_lda = lda.fit_transform(X_bow_counts)
-#     return X_lda, lda, count_vect
-
 def train_lda(df_train, df_test, n_topics, ld, text):
 
     count_vect = CountVectorizer()
