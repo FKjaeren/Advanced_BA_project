@@ -69,6 +69,8 @@ df_cat_low_avg_rating.shape
 df_cat_low_avg_rating[['category','avg_rating','num_ratings','rank','price']]
 
 # Save dataframe for category 
-df_cat.to_csv('data/df_'+category+'.csv',index=False)
+df_cat.to_csv('data/'+category+'/df_'+category+'.csv',index=False)
 
 
+
+# %%
