@@ -143,15 +143,13 @@ def preprocess_price(metadata_df):
     return df_train, df_test
 
 category = 'Candy & Chocolate'
-metadata_df = pd.read_csv('data/df_'+category+'.csv')
+metadata_df = pd.read_csv('data/'+category+'/df_'+category+'.csv')
 metadata_df['orig category'] = metadata_df['category']
 dummy_df = pd.get_dummies(metadata_df, columns=['brand','orig category'])
 metadata_df = metadata_df.drop(columns=['brand'])
 
 df_train, df_test = preprocess_price(metadata_df)
 df_train_dummy, df_test_dummy = preprocess_price(dummy_df)
-
-# metadata_df_clean = preprocess_data(metadata_df)
 
 df_train, df_test = preprocess_data(df_train, df_test)
 df_train_dummy, df_test_dummy = preprocess_data(df_train_dummy, df_test_dummy)
@@ -220,8 +218,8 @@ df_train['cluster'] = kmeans.labels_
 pca_values_test = pca.transform(df_test_dummy)
 df_test['cluster'] = kmeans.predict(pca_values_test)
 
-sns.scatterplot('price','num_ratings', hue = 'cluster', data = df_train)
-plt.show()
+#sns.scatterplot('price','num_ratings', hue = 'cluster', data = df_train)
+#plt.show()
 
 df_train.to_csv('data/' + category + '/df_train_preprocessed.csv',index=False)
 df_test.to_csv('data/' + category + '/df_test_preprocessed.csv',index=False)
