@@ -3,6 +3,9 @@ import pandas as pd
 import numpy as np
 import gower
 from sklearn.cluster import DBSCAN
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+
 from sklearn.model_selection import train_test_split
 
 def preprocess_data(metadata_df):
@@ -67,13 +70,16 @@ def preprocess_data(metadata_df):
     df_train['also_buy'] = df_train['also_buy'].fillna('').apply(get_number_also_buy)
     df_test['also_buy'] = df_test['also_buy'].fillna('').apply(get_number_also_buy)
 
-    # CLUSTERING??
-    # get top 10 brands
-    # top = 10
-    # X['brand'] = X['brand'].str.replace('Unknown','')
-    # brands = X['brand'].value_counts().sort_values(ascending=False).index[0:(top)].to_list()
-    # X['top_brand'] = X['brand'].apply(lambda row: get_brand(row, brands))
-    #X = X.drop(columns=['brand'])
+    #top = 100
+    #brands = df_train['brand'].value_counts().sort_values(ascending=False).index[0:(top)].to_list()
+    #df_train['top_brand'] = df_train['brand'].apply(lambda row: get_brand(row, brands))
+    #print("other brands",len(df_train[df_train['top_brand']=='Other']['top_brand']))
+    #print("top brands",len(df_train[df_train['top_brand']==brands[0]]['top_brand']))
+    #while (len(df_train[df_train['top_brand']=='Other']['top_brand']) >= df_train['top_brand'].value_counts()[1:].sum()):
+    #    next_brand = df_train['brand'].value_counts().sort_values(ascending=False).index[top:top+10].to_list
+    #    brands.append(next_brand)
+    #    df_train['top_brand'] = df_train['brand'].apply(lambda row: get_brand(row, brands))
+    #    top = top+11
 
     # sales rank information
     df_train['rank'] = df_train['rank'].apply(get_rank).str.replace(',','').str.extract('(\d+|$)')
@@ -129,6 +135,29 @@ category = 'Candy & Chocolate'
 metadata_df = pd.read_csv('data/df_'+category+'.csv')
 # metadata_df_clean = preprocess_data(metadata_df)
 df_train, df_test = preprocess_data(metadata_df)
+
+
+#### Cluster brands:
+
+brand_dummy_data = pd.get_dummies(df_train[['brand']], columns = ['brand'])
+
+
+pca = PCA(n_components=100)
+pca.fit(brand_dummy_data)
+print(pca.explained_variance_ratio_)
+
+pca = PCA(n_components=10)
+pca_values = pca.fit_transform(brand_dummy_data)
+
+dbscan_cluster = DBSCAN(eps=0.3, 
+                        min_samples=1000)
+
+# Fitting the clustering algorithm
+dbscan_cluster.fit(brand_dummy_data)
+
+# Adding the results to a new column in the dataframe
+df_train['cluster'] = dbscan_cluster.labels_
+
 
 #Counter(" ".join(metadata_df_clean["description"]).split()).most_common(1000)
 
