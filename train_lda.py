@@ -144,9 +144,9 @@ today = date.today()
 df_train_lda.to_csv('data/' + category + '/df_train_lda.csv',index=False)
 df_test_lda.to_csv('data/' + category + '/df_test_lda.csv',index=False)
 #
-filename = 'models/'+category+'lda_model_'+str(today)+'.sav'
+filename = 'models/'+category+'/lda_model_'+str(today)+'.sav'
 pickle.dump(lda, open(filename, 'wb'))
-filename = 'models/'+category+'count_vect_model_'+str(today)+'.sav'
+filename = 'models/'+category+'/count_vect_model_'+str(today)+'.sav'
 pickle.dump(count_vect, open(filename, 'wb'))
 
 # %%
