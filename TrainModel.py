@@ -1,3 +1,4 @@
+import catboost
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -140,7 +141,7 @@ def train_regression_models(X_train, X_test, y_train, y_test):
     names = ['linear_regression', 'xgb_regressor', 'catboost_regressor', 'sgd_regressor', 'elastic_net', 
             'bayesian_ridge', 'gb_regressor']
     best_idx = np.argmin(MAEs)
-
+    print(best_idx)
     return models[best_idx], names[best_idx]
 
 def tune_model(model, name, X_train, y_train):
@@ -153,12 +154,25 @@ def tune_model(model, name, X_train, y_train):
                 depth = Grid_CBC.best_params_['depth']
                 learning_rate = Grid_CBC.best_params_['learning_rate']
                 catboost_regressor = CatBoostRegressor(allow_writing_files=False, depth=depth, learning_rate=learning_rate).fit(X_train, y_train, logging_level='Silent')
-        return Grid_CBC.best_params_, catboost_regressor           
+                regressor = catboost_regressor
+                parameters = Grid_CBC.best_params_
+        elif name == 'gb_regressor':
+                # tune parameters of gradient boost regressor
+                parameters = {'max_depth' : [5, 10, 15],
+                                'learning_rate' : [0.02, 0.03]}
+                Grid_GBR = GridSearchCV(estimator=model, param_grid=parameters, cv=5, n_jobs=-1, verbose=0)
+                Grid_GBR.fit(X_train, y_train)
+                depth = Grid_GBR.best_params_['depth']
+                learning_rate = Grid_GBR.best_params_['learning_rate']
+                gb_regressor = GradientBoostingRegressor(depth=depth, learning_rate=learning_rate).fit(X_train, y_train)
+                regressor = gb_regressor
+                parameters = Grid_GBR.best_params_
+        return parameters, regressor           
 
 
 # train and tune model
 model, name = train_regression_models(X_train, X_test, y_train, y_test)
-# params, tuned_model = tune_model(model, name, X_train, y_train)
+params, tuned_model = tune_model(model, name, X_train, y_train)
 
 # validate model
 # predictions = tuned_model.predict(X_test)
@@ -175,4 +189,11 @@ if category == 'all':
         pickle.dump(model, open(filename, 'wb'))
 else:
         filename = 'models/'+category+'/best_performing_model_'+str(today)+'.sav'
+        pickle.dump(model, open(filename, 'wb'))
+
+if category == 'all':
+        filename = 'models/tuned_'+name+'_'+str(today)+'.sav'
+        pickle.dump(model, open(filename, 'wb'))
+else:
+        filename = 'models/'+category+'/tuned_'+name+'_'+str(today)+'.sav'
         pickle.dump(model, open(filename, 'wb'))
