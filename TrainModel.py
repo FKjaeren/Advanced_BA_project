@@ -146,8 +146,8 @@ def train_regression_models(X_train, X_test, y_train, y_test):
 def tune_model(model, name, X_train, y_train):
         if name == 'catboost_regressor':
                 # tune parameters of catboost
-                parameters = {'depth' : [5, 10, 15, 20],
-                                'learning_rate' : [0.01, 0.02, 0.03]}
+                parameters = {'depth' : [5, 10, 15],
+                                'learning_rate' : [0.02, 0.03]}
                 Grid_CBC = GridSearchCV(estimator=model, param_grid=parameters, cv=5, n_jobs=-1, verbose=0)
                 Grid_CBC.fit(X_train, y_train)
                 depth = Grid_CBC.best_params_['depth']
