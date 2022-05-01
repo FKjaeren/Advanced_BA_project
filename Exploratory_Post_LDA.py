@@ -15,9 +15,9 @@ plt.show()
 df_subset = df_train[df_train['price']<80]
 df_subset = df_subset[df_subset['also_buy']<400]
 #df_subset = df_subset[df_subset['rank']]
-df_subset = df_subset[['avg_rating', 'std_rating', 'num_ratings', 'description', 'also_buy',
+df_subset = df_subset[['avg_rating', 'std_rating', 'num_ratings', 'also_buy',
        'rank', 'also_view', 'price','lda1',
-       'lda2', 'lda3', 'lda4', 'lda5']]
+       'lda2', 'lda3']]
 df_subset[df_subset['num_ratings']<50].hist(bins = 20)
 plt.show()
 
@@ -31,10 +31,10 @@ plt.show()
 ## We find subsets of the data, to limit the amount of products to check.
 
 ## Finding the 75% quantile of number of ratings
-df_train['num_ratings'].describe()
+df_train['rank'].describe()
 
 ## Defining that subset
-products_to_enhance = df_train[df_train['num_ratings']>df_train['num_ratings'].describe().loc['75%']]
+products_to_enhance = df_train[df_train['rank']<=df_train['rank'].describe().loc['25%']]
 
 products_to_enhance['num_ratings'].describe()
 
@@ -48,10 +48,10 @@ products_to_enhance['avg_rating'].describe()
 
 products_to_enhance = products_to_enhance[products_to_enhance['avg_rating'] <= df_train['avg_rating'].describe().loc['25%'] ]
 
-products_to_enhance['num_ratings'].describe()
+products_to_enhance['rank'].describe()
 
 ## finding the 75% quantile of number of ratings from the subset
-products_to_enhance = products_to_enhance[products_to_enhance['num_ratings']>=products_to_enhance['num_ratings'].describe().loc['75%']]
+products_to_enhance = products_to_enhance[products_to_enhance['rank']<=products_to_enhance['rank'].describe().loc['25%']]
 
 products_to_enhance['std_rating'].describe()
 
@@ -60,8 +60,13 @@ products_to_enhance = products_to_enhance[products_to_enhance['std_rating'] <= p
 
 #products_to_enhance = products_to_enhance[products_to_enhance['rank'] <= products_to_enhance['rank'].describe().loc['75%'] ]
 
-product_to_enhance = products_to_enhance.loc[products_to_enhance['avg_rating'] == min(products_to_enhance['avg_rating'])]
+product_to_enhance = products_to_enhance.loc[products_to_enhance['rank'] == min(products_to_enhance['rank'])]
 
 sns.heatmap(products_to_enhance.corr().round(2), cmap='Blues', annot=True)\
    .set_title('Correlation matrix')
 plt.show()
+
+
+indexes = df_train['avg_rating'].sort_values(ascending=False)[0:199].index.to_list()
+
+print("The indexes of the 200 best rated products: ",indexes)
