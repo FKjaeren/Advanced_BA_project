@@ -58,6 +58,11 @@ products_to_enhance['std_rating'].describe()
 ## Finding the 25% quantile of standard deviations for ratings in the subset
 products_to_enhance = products_to_enhance[products_to_enhance['std_rating'] <= products_to_enhance['std_rating'].describe().loc['25%'] ]
 
+#products_to_enhance = products_to_enhance[products_to_enhance['rank'] <= products_to_enhance['rank'].describe().loc['75%'] ]
+
+product_to_enhance = products_to_enhance.loc[products_to_enhance['avg_rating'] == min(products_to_enhance['avg_rating'])]
+
 sns.heatmap(products_to_enhance.corr().round(2), cmap='Blues', annot=True)\
    .set_title('Correlation matrix')
 plt.show()
+
