@@ -75,10 +75,10 @@ def visualize_topics(lda, count_vect, terms_count):
 #%% RUN LDA
 
 # get data
-category = 'Candy & Chocolate' # 'all' if you want to select data with all categories 
-if category != all:
-    train_path = 'data/' + category + '/df_train_preprocessed.csv'
-    test_path = 'data/' + category + '/df_test_preprocessed.csv'
+category = 'Beverages' # 'all' if you want to select data with all categories 
+if category != 'all':
+    train_path = 'data/' + category + '/df_train.csv'
+    test_path = 'data/' + category + '/df_test.csv'
     # path = 'data/metadata_df_preprocessed'+'_'+category+'.csv'
 else:
     train_path = 'data/df_train.csv'
@@ -148,5 +148,3 @@ filename = 'models/'+category+'/lda_model_'+str(today)+'.sav'
 pickle.dump(lda, open(filename, 'wb'))
 filename = 'models/'+category+'/count_vect_model_'+str(today)+'.sav'
 pickle.dump(count_vect, open(filename, 'wb'))
-
-# %%

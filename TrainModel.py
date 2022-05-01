@@ -15,7 +15,7 @@ from datetime import date
 np.random.seed(42)
 
 # load data
-category = 'Candy & Chocolate'
+category = 'Beverages'
 if category == 'all':
         # load data 
         df = pd.read_csv('data/lda_and_preprocessed_df.csv')
@@ -158,15 +158,15 @@ def tune_model(model, name, X_train, y_train):
 
 # train and tune model
 model, name = train_regression_models(X_train, X_test, y_train, y_test)
-params, tuned_model = tune_model(model, name, X_train, y_train)
+# params, tuned_model = tune_model(model, name, X_train, y_train)
 
 # validate model
-predictions = tuned_model.predict(X_test)
+# predictions = tuned_model.predict(X_test)
 
-print("The predictions using the best performing models are: ", predictions)
-print("The true values are: ", y_test)
-print("This gives the difference between predictions and true values: ", predictions-y_test)
-print("The MAE of the model is: ", mean_absolute_error(y_test, predictions))
+# print("The predictions using the best performing models are: ", predictions)
+# print("The true values are: ", y_test)
+# print("This gives the difference between predictions and true values: ", predictions-y_test)
+# print("The MAE of the model is: ", mean_absolute_error(y_test, predictions))
 
 today = date.today()
 

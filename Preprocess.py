@@ -6,9 +6,17 @@ import gower
 from sklearn.cluster import DBSCAN
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
-
+from collections import Counter
+from sklearn.feature_extraction import _stop_words
+import string
+import nltk
+nltk.download('wordnet')
+nltk.download('punkt')
+from nltk.stem import WordNetLemmatizer
+lemmatizer = WordNetLemmatizer()
+Stop_Words= _stop_words.ENGLISH_STOP_WORDS
+from bs4 import BeautifulSoup
 from sklearn.model_selection import train_test_split
-
 
 def preprocess_data(df_train, df_test):
     # split data, so we DON'T use test for preprocessing
@@ -26,6 +34,20 @@ def preprocess_data(df_train, df_test):
     # get number of also_view
     df_train['also_view'] = df_train['also_view'].fillna('').apply(get_number_also_buy)
     df_test['also_view'] = df_test['also_view'].fillna('').apply(get_number_also_buy)
+
+    # clean description
+    df_train['description'] = df_train['description'].apply(get_description)
+    df_train = df_train.dropna(axis = 0, subset=['description'])
+    df_train['description'] = df_train['description'].apply(str)
+    df_train['description'] = df_train['description'].str.replace('\n', '')
+    df_train['description'] = df_train[['description']].applymap(lambda text: BeautifulSoup(text, 'html.parser').get_text())
+    df_train['description'] = df_train['description'].apply(text_processing)
+    df_test['description'] = df_test['description'].apply(get_description)
+    df_test = df_test.dropna(axis = 0, subset=['description'])
+    df_test['description'] = df_test['description'].apply(str)
+    df_test['description'] = df_test['description'].str.replace('\n', '')
+    df_test['description'] = df_test[['description']].applymap(lambda text: BeautifulSoup(text, 'html.parser').get_text())
+    df_test['description'] = df_test['description'].apply(text_processing)
 
     return df_train, df_test
 
@@ -47,6 +69,28 @@ def get_rank(row):
             return ''
     else:
         return row
+
+def get_description(row):
+    if isinstance(row, list):
+        if len(row)>0:
+            return row
+        else:
+            return np.nan
+    else:
+        return row
+
+def text_processing(text):
+    # remove punctuation 
+    text = "".join([c for c in text 
+        if c not in string.punctuation])
+    # lowercase
+    text = "".join([c.lower() for c in text])
+    # remove stopwords
+    text = " ".join([w for w in text.split() 
+        if w not in Stop_Words])
+    # stemming / lematizing (optional)
+    text = " ".join([lemmatizer.lemmatize(w) for w in text.split()])
+    return text
 
 def preprocess_price(metadata_df):
     df = metadata_df.drop(columns = ['item','title','feature','main_cat','similar_item','details','timestamp'])
@@ -96,7 +140,7 @@ pca.fit(df_train_dummy)
 print(pca.explained_variance_ratio_)
 pca = PCA(n_components=2).fit(df_train_dummy)
 pca_values = pca.fit_transform(df_train_dummy)
-kmeans = KMeans().fit(pca_values)
+kmeans = KMeans(n_clusters=5).fit(pca_values)
 df_train['cluster'] = kmeans.labels_
 pca_values_test = pca.transform(df_test_dummy)
 df_test['cluster'] = kmeans.predict(pca_values_test)
@@ -104,8 +148,19 @@ df_test['cluster'] = kmeans.predict(pca_values_test)
 df_train = pd.get_dummies(df_train, columns = ['cluster'])
 df_test = pd.get_dummies(df_test, columns = ['cluster'])
 
+# ensure same shape of train and test
+if df_train.shape[1] != df_test.shape[1]:
+    setdiff = set(df_train.columns).difference(set(df_test.columns))
+    for name in setdiff:
+        print(name)
+        df_test[name] = np.zeros(df_test.shape[0])
+        df_test = df_test.astype({name:'int'})
+        
+# order columns in test set
+df_test = df_test[df_train.columns]     
+
 #sns.scatterplot('price','num_ratings', hue = 'cluster', data = df_train)
 #plt.show()
 
-df_train.to_csv('data/' + category + '/df_train_preprocessed.csv',index=False)
-df_test.to_csv('data/' + category + '/df_test_preprocessed.csv',index=False)
+df_train.to_csv('data/' + category + '/df_train.csv',index=False)
+df_test.to_csv('data/' + category + '/df_test.csv',index=False)
