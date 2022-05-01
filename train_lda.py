@@ -75,7 +75,7 @@ def visualize_topics(lda, count_vect, terms_count):
 #%% RUN LDA
 
 # get data
-category = 'Beverages' # 'all' if you want to select data with all categories 
+category = 'Snack Foods' # 'all' if you want to select data with all categories 
 if category != 'all':
     train_path = 'data/' + category + '/df_train.csv'
     test_path = 'data/' + category + '/df_test.csv'
@@ -85,6 +85,8 @@ else:
     test_path = 'data/df_test.csv'
 df_train = pd.read_csv(train_path)
 df_test = pd.read_csv(test_path)
+df_train = df_train.dropna(axis=0,subset=['description'])
+df_test = df_test.dropna(axis=0,subset=['description'])
 
 # Options to try with our LDA
 # Beware it will try *all* of the combinations, so it'll take ages
@@ -115,10 +117,7 @@ n_topics = gridsearch.best_params_['n_components']
 learning_decay = gridsearch.best_params_['learning_decay']
 
 # Run LDA with tuned parameters
-n_topics = 5
-learning_decay = 0.5
 X_train_lda, X_test_lda, lda, count_vect = train_lda(df_train, df_test, n_topics, learning_decay, 'description')
-# X_lda, lda, count_vect = train_lda(df, n_topics, learning_decay, 'description')
 
 # Visualize topics as wordclouds
 visualize_topics(lda, count_vect, 25)

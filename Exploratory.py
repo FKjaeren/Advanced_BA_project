@@ -49,7 +49,7 @@ plt.show()
 #%% Investigate specific category 
   
 # Select category 
-category = 'Candy & Chocolate'
+category = 'Snack Foods'
 df_cat = df[df['category']==category]
 numeric_features = ['avg_rating','std_rating','num_ratings','also_buy', 'also_view','price']
 
@@ -70,7 +70,3 @@ df_cat_low_avg_rating[['category','avg_rating','num_ratings','rank','price']]
 
 # Save dataframe for category 
 df_cat.to_csv('data/'+category+'/df_'+category+'.csv',index=False)
-
-
-
-# %%
