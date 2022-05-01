@@ -65,4 +65,3 @@ product_to_enhance = products_to_enhance.loc[products_to_enhance['avg_rating'] =
 sns.heatmap(products_to_enhance.corr().round(2), cmap='Blues', annot=True)\
    .set_title('Correlation matrix')
 plt.show()
-
