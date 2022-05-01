@@ -48,7 +48,6 @@ def preprocess_data(df_train, df_test):
     df_test['description'] = df_test['description'].str.replace('\n', '')
     df_test['description'] = df_test[['description']].applymap(lambda text: BeautifulSoup(text, 'html.parser').get_text())
     df_test['description'] = df_test['description'].apply(text_processing)
-
     return df_train, df_test
 
 def get_number_also_buy(row):
@@ -119,7 +118,7 @@ def preprocess_price(metadata_df):
         df_test = df_test.drop(columns = ['orig category'])
     return df_train, df_test
 
-category = 'Candy & Chocolate'
+category = 'Snack Foods'
 metadata_df = pd.read_csv('data/'+category+'/df_'+category+'.csv')
 metadata_df['orig category'] = metadata_df['category']
 dummy_df = pd.get_dummies(metadata_df, columns=['brand','orig category'])
@@ -130,7 +129,6 @@ df_train_dummy, df_test_dummy = preprocess_price(dummy_df)
 
 df_train, df_test = preprocess_data(df_train, df_test)
 df_train_dummy, df_test_dummy = preprocess_data(df_train_dummy, df_test_dummy)
-
 
 df_train_dummy = df_train_dummy.drop(columns = ['description','std_rating'])
 df_test_dummy = df_test_dummy.drop(columns = ['description','std_rating'])
@@ -152,7 +150,6 @@ df_test = pd.get_dummies(df_test, columns = ['cluster'])
 if df_train.shape[1] != df_test.shape[1]:
     setdiff = set(df_train.columns).difference(set(df_test.columns))
     for name in setdiff:
-        print(name)
         df_test[name] = np.zeros(df_test.shape[0])
         df_test = df_test.astype({name:'int'})
         

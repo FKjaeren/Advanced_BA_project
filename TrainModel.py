@@ -15,7 +15,7 @@ from datetime import date
 np.random.seed(42)
 
 # load data
-category = 'Beverages'
+category = 'Candy & Chocolate'
 if category == 'all':
         # load data 
         df = pd.read_csv('data/lda_and_preprocessed_df.csv')
