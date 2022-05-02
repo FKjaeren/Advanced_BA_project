@@ -15,6 +15,7 @@ def prepare_data(ratings_df, reviews_df, metadata_df):
 
     # drop columns in metadata
     metadata_df = metadata_df.drop(columns=['imageURL','imageURLHighRes'])
+    print(metadata_df.columns)
     
     # drop na's and duplicates
     reviews_df = reviews_df.dropna()
@@ -31,10 +32,8 @@ def prepare_data(ratings_df, reviews_df, metadata_df):
 
     # preprocess price
     metadata_df['price'] =  pd.to_numeric(metadata_df['price'].str.replace('$',''), errors='coerce')
-
     metadata_df['category'] = metadata_df['category'].fillna('')
     metadata_df['category'] = metadata_df['category'].apply(get_category)
-    
 
     return reviews_df, metadata_df
 
@@ -52,10 +51,17 @@ review_filepath = 'raw_data/Grocery_and_Gourmet_Food_5.json'
 metadata_filepath = 'raw_data/meta_Grocery_and_Gourmet_Food.json'
 
 raw_ratings, raw_reviews, raw_metadata = load_data(rating_filepath=rating_filepath, review_filepath=review_filepath, metadata_filepath=metadata_filepath)
-
 reviews_df, metadata_df = prepare_data(raw_ratings, raw_reviews, raw_metadata)
 
 reviews_df.to_csv('data/reviews_df.csv',index=False)
 metadata_df.to_csv('data/metadata_df.csv',index=False)
 
+category = 'Candy & Chocolate'
+metadata_df[metadata_df['category']==category].to_csv('data/'+category+'/df_'+category+'.csv', index=False)
+
+category = 'Snack Foods'
+metadata_df[metadata_df['category']==category].to_csv('data/'+category+'/df_'+category+'.csv', index=False)
+
+category = 'Beverages'
+metadata_df[metadata_df['category']==category].to_csv('data/'+category+'/df_'+category+'.csv', index=False)
 
