@@ -12,6 +12,12 @@ from sklearn.model_selection import GridSearchCV
 import pickle
 from datetime import date
 
+# for sentiment analysis
+import nltk
+nltk.download('vader_lexicon')
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+sid = SentimentIntensityAnalyzer()
+
 # set random seed
 np.random.seed(42)
 
@@ -31,16 +37,32 @@ else:
 
         # CLUSTERING
         # df_train = pd.get_dummies(df_train, columns=['top_brand'])
-        df_train = df_train.drop(columns=['description','std_rating'])
-        df_test = df_test.drop(columns=['description','std_rating'])
+        # df_train = df_train.drop(columns=['description','std_rating'])
+        # df_test = df_test.drop(columns=['description','std_rating'])
+        df_train = df_train.drop(columns=['std_rating','num_ratings','also_view','also_buy'])
+        df_test = df_test.drop(columns=['std_rating','num_ratings','also_view','also_buy'])
 df_train = df_train.dropna()
 df_test = df_test.dropna()
 
+# rank another scale
+div_train = max(df_train['rank'])/99
+df_train['rank_new'] = np.floor(df_train['rank']/div_train)+1
+div_test = max(df_test['rank'])/99
+df_test['rank_new'] = np.floor(df_test['rank']/div_test)+1
+
+# sentimental analysis of description
+def get_sentiment(row):
+        pos = sid.polarity_scores(row)['compound']
+        return pos 
+
+df_train['description_sentiment'] = df_train['description'].apply(get_sentiment) # the positive score
+df_test['description_sentiment'] = df_test['description'].apply(get_sentiment) 
+
 # prepare for training
-y_train = df_train['avg_rating']
-y_test = df_test['avg_rating']
-X_train = df_train.drop(columns=['avg_rating'])
-X_test = df_test.drop(columns=['avg_rating'])
+y_train = df_train['rank_new']
+y_test = df_test['rank_new']
+X_train = df_train.drop(columns=['rank','rank_new','description'])
+X_test = df_test.drop(columns=['rank','rank_new','description'])
 
 def train_regression_models(X_train, X_test, y_train, y_test):
     # Linear Regression
@@ -142,13 +164,13 @@ def train_regression_models(X_train, X_test, y_train, y_test):
             'bayesian_ridge', 'gb_regressor']
     best_idx = np.argmin(MAEs)
     print(best_idx)
-    return models[best_idx], names[best_idx]
+    return models[best_idx], names[best_idx], models[2], names[2]
 
 def tune_model(model, name, X_train, y_train):
         if name == 'catboost_regressor':
                 # tune parameters of catboost
-                parameters = {'depth' : [5, 10, 15],
-                                'learning_rate' : [0.02, 0.03]}
+                #parameters = {'depth' : [5, 10, 15],'learning_rate' : [0.02, 0.03]}
+                parameters = {'depth': [5], 'learning_rate': [0.02]}
                 Grid_CBC = GridSearchCV(estimator=model, param_grid=parameters, cv=5, n_jobs=-1, verbose=0)
                 Grid_CBC.fit(X_train, y_train)
                 depth = Grid_CBC.best_params_['depth']
@@ -158,42 +180,52 @@ def tune_model(model, name, X_train, y_train):
                 parameters = Grid_CBC.best_params_
         elif name == 'gb_regressor':
                 # tune parameters of gradient boost regressor
-                parameters = {'max_depth' : [5, 10, 15],
-                                'learning_rate' : [0.02, 0.03]}
+                #parameters = {'max_depth' : [5, 10, 15], 'learning_rate' : [0.02, 0.03]}
+                parameters = {'max_depth' : [5], 'learning_rate' : [0.02]}
                 Grid_GBR = GridSearchCV(estimator=model, param_grid=parameters, cv=5, n_jobs=-1, verbose=0)
                 Grid_GBR.fit(X_train, y_train)
-                depth = Grid_GBR.best_params_['depth']
+                depth = Grid_GBR.best_params_['max_depth']
                 learning_rate = Grid_GBR.best_params_['learning_rate']
-                gb_regressor = GradientBoostingRegressor(depth=depth, learning_rate=learning_rate).fit(X_train, y_train)
+                gb_regressor = GradientBoostingRegressor(max_depth=depth, learning_rate=learning_rate).fit(X_train, y_train)
                 regressor = gb_regressor
                 parameters = Grid_GBR.best_params_
         return parameters, regressor           
 
 
 # train and tune model
-model, name = train_regression_models(X_train, X_test, y_train, y_test)
-params, tuned_model = tune_model(model, name, X_train, y_train)
+model, name, model_cb, name_cb = train_regression_models(X_train, X_test, y_train, y_test)
+#params, tuned_model = tune_model(model, name, X_train, y_train)
+#params_cb, tuned_model_cb = tune_model(model_cb, name_cb, X_train, y_train)
 
-# validate model
-# predictions = tuned_model.predict(X_test)
+# # validate model
+# predictions_gb = model.predict(X_test)
+# predictions_cb = model_cb.predict(X_test)
+# # print("The predictions using the best performing models are: ", predictions)
+# # print("The true values are: ", y_test)
+# # print("This gives the difference between predictions and true values: ", predictions-y_test)
+# # print("The MAE of the model is: ", mean_absolute_error(y_test, predictions))
+# MAE_tuned_gb = mean_absolute_error(y_test, predictions_gb)
+# MAE_tuned_cb = mean_absolute_error(y_test, predictions_cb)
 
-# print("The predictions using the best performing models are: ", predictions)
-# print("The true values are: ", y_test)
-# print("This gives the difference between predictions and true values: ", predictions-y_test)
-# print("The MAE of the model is: ", mean_absolute_error(y_test, predictions))
+# today = date.today()
 
+# if category == 'all':
+#         filename = 'models/best_performing_model_'+str(today)+'.sav'
+#         pickle.dump(model, open(filename, 'wb'))
+# else:
+#         filename = 'models/'+category+'/best_performing_model_'+str(today)+'.sav'
+#         pickle.dump(model, open(filename, 'wb'))
+
+# if category == 'all':
+#         filename = 'models/tuned_'+name+'_'+str(today)+'.sav'
+#         pickle.dump(model, open(filename, 'wb'))
+# else:
+#         filename = 'models/'+category+'/tuned_'+name+'_'+str(today)+'.sav'
+#         pickle.dump(model, open(filename, 'wb'))
+
+# fit catboost lda 5
 today = date.today()
-
-if category == 'all':
-        filename = 'models/best_performing_model_'+str(today)+'.sav'
-        pickle.dump(model, open(filename, 'wb'))
-else:
-        filename = 'models/'+category+'/best_performing_model_'+str(today)+'.sav'
-        pickle.dump(model, open(filename, 'wb'))
-
-if category == 'all':
-        filename = 'models/tuned_'+name+'_'+str(today)+'.sav'
-        pickle.dump(model, open(filename, 'wb'))
-else:
-        filename = 'models/'+category+'/tuned_'+name+'_'+str(today)+'.sav'
-        pickle.dump(model, open(filename, 'wb'))
+filename = 'models/'+category+'/rank_model_with_sentiment'+str(today)+'.sav'
+pickle.dump(model, open(filename, 'wb'))
+df_train.to_csv('data/' + category + '/df_train.csv',index=False)
+df_test.to_csv('data/' + category + '/df_test.csv',index=False)

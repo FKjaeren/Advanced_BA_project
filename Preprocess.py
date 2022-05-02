@@ -35,6 +35,10 @@ def preprocess_data(df_train, df_test):
     df_train['also_view'] = df_train['also_view'].fillna('').apply(get_number_also_buy)
     df_test['also_view'] = df_test['also_view'].fillna('').apply(get_number_also_buy)
 
+    # get description length
+    df_train['description_length'] = df_train['description'].apply(get_description_length)
+    df_test['description_length'] = df_test['description'].apply(get_description_length)
+
     # clean description
     df_train['description'] = df_train['description'].apply(get_description)
     df_train = df_train.dropna(axis = 0, subset=['description'])
@@ -48,6 +52,7 @@ def preprocess_data(df_train, df_test):
     df_test['description'] = df_test['description'].str.replace('\n', '')
     df_test['description'] = df_test[['description']].applymap(lambda text: BeautifulSoup(text, 'html.parser').get_text())
     df_test['description'] = df_test['description'].apply(text_processing)
+    
     return df_train, df_test
 
 def get_number_also_buy(row):
@@ -77,6 +82,15 @@ def get_description(row):
             return np.nan
     else:
         return row
+
+def get_description_length(row):
+    if isinstance(row, list):
+        if len(row)>0:
+            return len(row)
+        else:
+            return np.nan
+    else:
+        return len(row)
 
 def text_processing(text):
     # remove punctuation 
@@ -118,7 +132,7 @@ def preprocess_price(metadata_df):
         df_test = df_test.drop(columns = ['orig category'])
     return df_train, df_test
 
-category = 'Snack Foods'
+category = 'Candy & Chocolate'
 metadata_df = pd.read_csv('data/'+category+'/df_'+category+'.csv')
 metadata_df['orig category'] = metadata_df['category']
 dummy_df = pd.get_dummies(metadata_df, columns=['brand','orig category'])
@@ -133,9 +147,10 @@ df_train_dummy, df_test_dummy = preprocess_data(df_train_dummy, df_test_dummy)
 df_train_dummy = df_train_dummy.drop(columns = ['description','std_rating'])
 df_test_dummy = df_test_dummy.drop(columns = ['description','std_rating'])
 
-pca = PCA(n_components=100)
-pca.fit(df_train_dummy)
-print(pca.explained_variance_ratio_)
+#pca = PCA(n_components=100)
+#pca.fit(df_train_dummy)
+#print(pca.explained_variance_ratio_)
+
 pca = PCA(n_components=2).fit(df_train_dummy)
 pca_values = pca.fit_transform(df_train_dummy)
 kmeans = KMeans(n_clusters=5).fit(pca_values)

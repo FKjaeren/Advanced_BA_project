@@ -75,7 +75,7 @@ def visualize_topics(lda, count_vect, terms_count):
 #%% RUN LDA
 
 # get data
-category = 'Snack Foods' # 'all' if you want to select data with all categories 
+category = 'Candy & Chocolate' # 'all' if you want to select data with all categories 
 if category != 'all':
     train_path = 'data/' + category + '/df_train.csv'
     test_path = 'data/' + category + '/df_test.csv'
@@ -117,17 +117,18 @@ n_topics = gridsearch.best_params_['n_components']
 learning_decay = gridsearch.best_params_['learning_decay']
 
 # Run LDA with tuned parameters
+n_topics = 10
+learning_decay = 0.7
 X_train_lda, X_test_lda, lda, count_vect = train_lda(df_train, df_test, n_topics, learning_decay, 'description')
 
 # Visualize topics as wordclouds
 visualize_topics(lda, count_vect, 25)
 
 # # print top words from lda model 
-# print("\nTopics in LDA model:")
-# counts_feature_names = count_vect.get_feature_names()
-# n_top_words = 10
-# print_top_words(lda, counts_feature_names, n_top_words)
-
+print("\nTopics in LDA model:")
+counts_feature_names = count_vect.get_feature_names()
+n_top_words = 10
+print_top_words(lda, counts_feature_names, n_top_words)
 
 # Merge df with lda 
 lda_list = []
@@ -147,3 +148,5 @@ filename = 'models/'+category+'/lda_model_'+str(today)+'.sav'
 pickle.dump(lda, open(filename, 'wb'))
 filename = 'models/'+category+'/count_vect_model_'+str(today)+'.sav'
 pickle.dump(count_vect, open(filename, 'wb'))
+
+
