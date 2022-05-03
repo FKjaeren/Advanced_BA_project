@@ -14,7 +14,6 @@ nltk.download('wordnet')
 nltk.download('punkt')
 from nltk.stem import WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
-Stop_Words= _stop_words.ENGLISH_STOP_WORDS
 from bs4 import BeautifulSoup
 from sklearn.model_selection import train_test_split
 
@@ -118,7 +117,14 @@ def preprocess_price(metadata_df):
         df_test = df_test.drop(columns = ['orig category'])
     return df_train, df_test
 
-category = 'Snack Foods'
+category = 'Candy & Chocolate'
+if category == 'Candy & Chocolate':
+    Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union(['chocolate','fda','supplement','cocoa','candy','cure','condition'])
+elif category == 'Snack Foods':
+    Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union([''])
+elif category == 'Beverages':
+    Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union([''])
+
 metadata_df = pd.read_csv('data/'+category+'/df_'+category+'.csv')
 metadata_df['orig category'] = metadata_df['category']
 dummy_df = pd.get_dummies(metadata_df, columns=['brand','orig category'])

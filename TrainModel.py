@@ -17,22 +17,11 @@ np.random.seed(42)
 
 # load data
 category = 'Candy & Chocolate'
-if category == 'all':
-        # load data 
-        df = pd.read_csv('data/lda_and_preprocessed_df.csv')
-        # get dummies and drop description
-        df = pd.get_dummies(df, columns=['category','top_brand'])
-        df = df.drop(columns=['description','std_rating'])
-else:
-        # load data 
-        df_train = pd.read_csv('data/' + category + '/df_train_lda.csv')
-        df_test = pd.read_csv('data/' + category + '/df_test_lda.csv')
-        # get dummies and drop description
+df_train = pd.read_csv('data/' + category + '/df_train_lda.csv')
+df_test = pd.read_csv('data/' + category + '/df_test_lda.csv')
 
-        # CLUSTERING
-        # df_train = pd.get_dummies(df_train, columns=['top_brand'])
-        df_train = df_train.drop(columns=['description','std_rating'])
-        df_test = df_test.drop(columns=['description','std_rating'])
+df_train = df_train.drop(columns=['description','std_rating'])
+df_test = df_test.drop(columns=['description','std_rating'])
 df_train = df_train.dropna()
 df_test = df_test.dropna()
 
@@ -183,17 +172,9 @@ params, tuned_model = tune_model(model, name, X_train, y_train)
 # print("The MAE of the model is: ", mean_absolute_error(y_test, predictions))
 
 today = date.today()
-
-if category == 'all':
-        filename = 'models/best_performing_model_'+str(today)+'.sav'
-        pickle.dump(model, open(filename, 'wb'))
-else:
-        filename = 'models/'+category+'/best_performing_model_'+str(today)+'.sav'
-        pickle.dump(model, open(filename, 'wb'))
-
-if category == 'all':
-        filename = 'models/tuned_'+name+'_'+str(today)+'.sav'
-        pickle.dump(model, open(filename, 'wb'))
-else:
-        filename = 'models/'+category+'/tuned_'+name+'_'+str(today)+'.sav'
-        pickle.dump(model, open(filename, 'wb'))
+# save model
+filename = 'models/'+category+'/best_performing_model_'+str(today)+'.sav'
+pickle.dump(model, open(filename, 'wb'))
+# save tuned model
+filename = 'models/'+category+'/tuned_'+name+'_'+str(today)+'.sav'
+pickle.dump(model, open(filename, 'wb'))

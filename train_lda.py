@@ -76,13 +76,8 @@ def visualize_topics(lda, count_vect, terms_count):
 
 # get data
 category = 'Snack Foods' # 'all' if you want to select data with all categories 
-if category != 'all':
-    train_path = 'data/' + category + '/df_train.csv'
-    test_path = 'data/' + category + '/df_test.csv'
-    # path = 'data/metadata_df_preprocessed'+'_'+category+'.csv'
-else:
-    train_path = 'data/df_train.csv'
-    test_path = 'data/df_test.csv'
+train_path = 'data/' + category + '/df_train.csv'
+test_path = 'data/' + category + '/df_test.csv'
 df_train = pd.read_csv(train_path)
 df_test = pd.read_csv(test_path)
 df_train = df_train.dropna(axis=0,subset=['description'])
@@ -90,7 +85,7 @@ df_test = df_test.dropna(axis=0,subset=['description'])
 
 # Options to try with our LDA
 # Beware it will try *all* of the combinations, so it'll take ages
-search_params = {'n_components': [ 3, 5, 7], 'learning_decay': [ .5, .7, .9]}
+search_params = {'n_components': [3, 5], 'learning_decay': [.5, .7]}
 
 # Set up LDA with the options we'll keep static
 model = LatentDirichletAllocation(learning_method='online',
