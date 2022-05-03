@@ -18,7 +18,6 @@ from bs4 import BeautifulSoup
 from sklearn.model_selection import train_test_split
 
 def preprocess_data(df_train, df_test):
-    # split data, so we DON'T use test for preprocessing
     # get number of also_buy
     df_train['also_buy'] = df_train['also_buy'].fillna('').apply(get_number_also_buy)
     df_test['also_buy'] = df_test['also_buy'].fillna('').apply(get_number_also_buy)
@@ -117,7 +116,7 @@ def preprocess_price(metadata_df):
         df_test = df_test.drop(columns = ['orig category'])
     return df_train, df_test
 
-category = 'Beverages'
+category = 'Snack Foods'
 if category == 'Candy & Chocolate':
     Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union(['chocolate','supplement','cocoa','candy','cure','condition'])
 elif category == 'Snack Foods':

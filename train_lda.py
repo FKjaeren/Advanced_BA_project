@@ -75,7 +75,7 @@ def visualize_topics(lda, count_vect, terms_count):
 #%% RUN LDA
 
 # get data
-category = 'Beverages'
+category = 'Candy & Chocolate'
 train_path = 'data/' + category + '/df_train.csv'
 test_path = 'data/' + category + '/df_test.csv'
 df_train = pd.read_csv(train_path)

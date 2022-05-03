@@ -16,7 +16,7 @@ from datetime import date
 np.random.seed(42)
 
 # load data
-category = 'Candy & Chocolate'
+category = 'Snack Foods'
 df_train = pd.read_csv('data/' + category + '/df_train_lda.csv')
 df_test = pd.read_csv('data/' + category + '/df_test_lda.csv')
 
@@ -130,7 +130,6 @@ def train_regression_models(X_train, X_test, y_train, y_test):
     names = ['linear_regression', 'xgb_regressor', 'catboost_regressor', 'sgd_regressor', 'elastic_net', 
             'bayesian_ridge', 'gb_regressor']
     best_idx = np.argmin(MAEs)
-    print(best_idx)
     return models[best_idx], names[best_idx]
 
 def tune_model(model, name, X_train, y_train):
@@ -161,7 +160,7 @@ def tune_model(model, name, X_train, y_train):
 
 # train and tune model
 model, name = train_regression_models(X_train, X_test, y_train, y_test)
-params, tuned_model = tune_model(model, name, X_train, y_train)
+# params, tuned_model = tune_model(model, name, X_train, y_train)
 
 # validate model
 # predictions = tuned_model.predict(X_test)
