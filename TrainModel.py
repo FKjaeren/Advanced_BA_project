@@ -175,5 +175,5 @@ today = date.today()
 filename = 'models/'+category+'/best_performing_model_'+str(today)+'.sav'
 pickle.dump(model, open(filename, 'wb'))
 # save tuned model
-filename = 'models/'+category+'/tuned_'+name+'_'+str(today)+'.sav'
-pickle.dump(model, open(filename, 'wb'))
+# filename = 'models/'+category+'/tuned_'+name+'_'+str(today)+'.sav'
+# pickle.dump(tuned_model, open(filename, 'wb'))
