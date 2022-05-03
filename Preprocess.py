@@ -83,11 +83,11 @@ def text_processing(text):
         if c not in string.punctuation])
     # lowercase
     text = "".join([c.lower() for c in text])
+    # stemming / lematizing (optional)
+    text = " ".join([lemmatizer.lemmatize(w) for w in text.split()])
     # remove stopwords
     text = " ".join([w for w in text.split() 
         if w not in Stop_Words])
-    # stemming / lematizing (optional)
-    text = " ".join([lemmatizer.lemmatize(w) for w in text.split()])
     return text
 
 def preprocess_price(metadata_df):
@@ -117,13 +117,13 @@ def preprocess_price(metadata_df):
         df_test = df_test.drop(columns = ['orig category'])
     return df_train, df_test
 
-category = 'Candy & Chocolate'
+category = 'Beverages'
 if category == 'Candy & Chocolate':
-    Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union(['chocolate','fda','supplement','cocoa','candy','cure','condition'])
+    Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union(['chocolate','supplement','cocoa','candy','cure','condition'])
 elif category == 'Snack Foods':
-    Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union([''])
+    Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union(['snack','food','fda','flavor','product','ingredient','statement'])
 elif category == 'Beverages':
-    Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union([''])
+    Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union(['tea','coffee','water','cup','supplement','flavor','year','food','condition'])
 
 metadata_df = pd.read_csv('data/'+category+'/df_'+category+'.csv')
 metadata_df['orig category'] = metadata_df['category']

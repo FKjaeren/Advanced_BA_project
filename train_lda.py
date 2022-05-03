@@ -75,7 +75,7 @@ def visualize_topics(lda, count_vect, terms_count):
 #%% RUN LDA
 
 # get data
-category = 'Snack Foods' # 'all' if you want to select data with all categories 
+category = 'Beverages'
 train_path = 'data/' + category + '/df_train.csv'
 test_path = 'data/' + category + '/df_test.csv'
 df_train = pd.read_csv(train_path)
@@ -85,7 +85,7 @@ df_test = df_test.dropna(axis=0,subset=['description'])
 
 # Options to try with our LDA
 # Beware it will try *all* of the combinations, so it'll take ages
-search_params = {'n_components': [3, 5], 'learning_decay': [.5, .7]}
+search_params = {'n_components': [2, 3, 4], 'learning_decay': [.6, .7, .8]}
 
 # Set up LDA with the options we'll keep static
 model = LatentDirichletAllocation(learning_method='online',
@@ -117,13 +117,6 @@ X_train_lda, X_test_lda, lda, count_vect = train_lda(df_train, df_test, n_topics
 # Visualize topics as wordclouds
 visualize_topics(lda, count_vect, 25)
 
-# # print top words from lda model 
-# print("\nTopics in LDA model:")
-# counts_feature_names = count_vect.get_feature_names()
-# n_top_words = 10
-# print_top_words(lda, counts_feature_names, n_top_words)
-
-
 # Merge df with lda 
 lda_list = []
 for i in range(n_topics):
@@ -137,7 +130,6 @@ df_test_lda = df_test.merge(X_test_lda_df, left_index=True, right_index=True)
 today = date.today()
 df_train_lda.to_csv('data/' + category + '/df_train_lda.csv',index=False)
 df_test_lda.to_csv('data/' + category + '/df_test_lda.csv',index=False)
-#
 filename = 'models/'+category+'/lda_model_'+str(today)+'.sav'
 pickle.dump(lda, open(filename, 'wb'))
 filename = 'models/'+category+'/count_vect_model_'+str(today)+'.sav'
