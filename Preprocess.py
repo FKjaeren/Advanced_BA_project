@@ -1,3 +1,4 @@
+# Import packages
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -17,6 +18,7 @@ lemmatizer = WordNetLemmatizer()
 from bs4 import BeautifulSoup
 from sklearn.model_selection import train_test_split
 
+# Function to preprocess the train and test dataset
 def preprocess_data(df_train, df_test):
     # get number of also_buy
     df_train['also_buy'] = df_train['also_buy'].fillna('').apply(get_number_also_buy)
@@ -33,13 +35,18 @@ def preprocess_data(df_train, df_test):
     df_train['also_view'] = df_train['also_view'].fillna('').apply(get_number_also_buy)
     df_test['also_view'] = df_test['also_view'].fillna('').apply(get_number_also_buy)
 
-    # clean description
+    # Clean description
     df_train['description'] = df_train['description'].apply(get_description)
+    # Drop rows with no information
     df_train = df_train.dropna(axis = 0, subset=['description'])
+    # Make it a string and clean html text
     df_train['description'] = df_train['description'].apply(str)
     df_train['description'] = df_train['description'].str.replace('\n', '')
     df_train['description'] = df_train[['description']].applymap(lambda text: BeautifulSoup(text, 'html.parser').get_text())
+    # Perform text processing where stop words are removed etc. 
     df_train['description'] = df_train['description'].apply(text_processing)
+
+    # Do the same for test dataset
     df_test['description'] = df_test['description'].apply(get_description)
     df_test = df_test.dropna(axis = 0, subset=['description'])
     df_test['description'] = df_test['description'].apply(str)
@@ -48,16 +55,17 @@ def preprocess_data(df_train, df_test):
     df_test['description'] = df_test['description'].apply(text_processing)
     return df_train, df_test
 
+# Number of also bougtht products
 def get_number_also_buy(row):
     number = len(row)
     return number
-
+# Get the brand
 def get_brand(row, brands):
     if row in brands:
         return row
     else:
         return 'Other'
-
+# Get the rank
 def get_rank(row):
     if isinstance(row, list):
         if len(row) > 0:
@@ -66,7 +74,7 @@ def get_rank(row):
             return ''
     else:
         return row
-
+# Use only rows with list of information else nan
 def get_description(row):
     if isinstance(row, list):
         if len(row)>0:
@@ -75,7 +83,7 @@ def get_description(row):
             return np.nan
     else:
         return row
-
+# Function used to clean text data
 def text_processing(text):
     # remove punctuation 
     text = "".join([c for c in text 
@@ -88,7 +96,7 @@ def text_processing(text):
     text = " ".join([w for w in text.split() 
         if w not in Stop_Words])
     return text
-
+# 
 def preprocess_price(metadata_df):
     df = metadata_df.drop(columns = ['item','title','feature','main_cat','similar_item','details','timestamp'])
     
@@ -116,6 +124,9 @@ def preprocess_price(metadata_df):
         df_test = df_test.drop(columns = ['orig category'])
     return df_train, df_test
 
+
+
+# Words from already trained lda model, which are useless 
 category = 'Snack Foods'
 if category == 'Candy & Chocolate':
     Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union(['chocolate','supplement','cocoa','candy','cure','condition'])
