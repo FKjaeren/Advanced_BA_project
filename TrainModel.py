@@ -1,9 +1,10 @@
+# Import packages
 import catboost
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, r2_score, explained_variance_score
-# 8 most popular regression models
+# 7 popular regression models
 from sklearn.linear_model import LinearRegression, ElasticNet, BayesianRidge, SGDRegressor
 from xgboost.sklearn import XGBRegressor
 from catboost import CatBoostRegressor
@@ -15,7 +16,7 @@ from datetime import date
 # set random seed
 np.random.seed(42)
 
-# load data
+# load data and select specific category 
 category = 'Snack Foods'
 df_train = pd.read_csv('data/' + category + '/df_train_lda.csv')
 df_test = pd.read_csv('data/' + category + '/df_test_lda.csv')
@@ -31,6 +32,7 @@ y_test = df_test['avg_rating']
 X_train = df_train.drop(columns=['avg_rating'])
 X_test = df_test.drop(columns=['avg_rating'])
 
+# Function to train 7 regression models
 def train_regression_models(X_train, X_test, y_train, y_test):
     # Linear Regression
     linear_regression = LinearRegression().fit(X_train, y_train)
@@ -132,11 +134,13 @@ def train_regression_models(X_train, X_test, y_train, y_test):
     best_idx = np.argmin(MAEs)
     return models[best_idx], names[best_idx]
 
+# Function to tune the best model where the two best are catboost or gb_regressor
 def tune_model(model, name, X_train, y_train):
         if name == 'catboost_regressor':
                 # tune parameters of catboost
                 parameters = {'depth' : [5, 10, 15],
                                 'learning_rate' : [0.02, 0.03]}
+                # Perform gridsearch with parameters
                 Grid_CBC = GridSearchCV(estimator=model, param_grid=parameters, cv=5, n_jobs=-1, verbose=0)
                 Grid_CBC.fit(X_train, y_train)
                 depth = Grid_CBC.best_params_['depth']
@@ -160,7 +164,7 @@ def tune_model(model, name, X_train, y_train):
 
 # train and tune model
 model, name = train_regression_models(X_train, X_test, y_train, y_test)
-# params, tuned_model = tune_model(model, name, X_train, y_train)
+params, tuned_model = tune_model(model, name, X_train, y_train)
 
 # validate model
 # predictions = tuned_model.predict(X_test)
