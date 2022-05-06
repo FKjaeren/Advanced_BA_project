@@ -52,27 +52,9 @@ plt.xticks(rotation=90)
 plt.tight_layout()
 plt.show()
 
-#%% Investigate specific category 
-  
 # Select category 
 category = 'Snack Foods'
 df_cat = df[df['category']==category]
-numeric_features = ['avg_rating','std_rating','num_ratings','also_buy', 'also_view','price']
-
-# Pairs plot of products in chosen category 
-plt.figure()
-sns.pairplot(df_cat[numeric_features],height=1.1, aspect=1.3)
-plt.xticks(rotation=90)
-plt.tight_layout   
-plt.show()
-# Observation biased data as no badly rated products have many ratings.
-
-# Products that sales a lot but has low average rating
-# df_cat = df_cat.sort_values(by='rank',ascending=False)
-# df_cat_low_avg_rating = df_cat[df_cat['avg_rating'] < 3]
-# df_cat_low_avg_rating = df_cat_low_avg_rating[df_cat_low_avg_rating['num_ratings'] >= 200]
-# df_cat_low_avg_rating.shape
-# df_cat_low_avg_rating[['category','avg_rating','num_ratings','rank','price']]
 
 # Save dataframe for category 
 df_cat.to_csv('data/'+category+'/df_'+category+'.csv',index=False)
