@@ -5,10 +5,10 @@ from sklearn.metrics import mean_absolute_error, r2_score, explained_variance_sc
 
 category = 'Candy & Chocolate'
 
-filename = 'models/'+category+'/lda_model_2022-05-01.sav'
+filename = 'models/'+category+'/lda_model_2022-05-03.sav'
 lda_model = pickle.load(open(filename, 'rb'))
 
-filename = 'models/'+category+'/count_vect_model_2022-05-01.sav'
+filename = 'models/'+category+'/count_vect_model_2022-05-03.sav'
 count_vect_model = pickle.load(open(filename, 'rb'))
 
 def print_top_words(model, feature_names, n_top_words):
@@ -24,7 +24,7 @@ counts_feature_names = count_vect_model.get_feature_names()
 n_top_words = 10
 print_top_words(lda_model, counts_feature_names, n_top_words)
 
-filename = 'models/'+category+'/tuned_gb_regressor_2022-05-01.sav'
+filename = 'models/'+category+'/tuned_gb_regressor_2022-05-03.sav'
 best_model = pickle.load(open(filename, 'rb'))
 
 test_df = pd.read_csv('data/'+category+'/df_test_lda.csv')
