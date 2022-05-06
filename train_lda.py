@@ -1,3 +1,4 @@
+# Import packages
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
@@ -21,6 +22,7 @@ def get_len(text):
     else:
         return len(text)
 
+# Function where LDA is trained on both the trainf and test. Both datasets are returned along with the model and count_vect
 def train_lda(df_train, df_test, n_topics, ld, text):
 
     count_vect = CountVectorizer()
@@ -37,6 +39,8 @@ def train_lda(df_train, df_test, n_topics, ld, text):
 
     return X_train_lda, X_test_lda, lda, count_vect
 
+
+# Function to print the top words in a topic
 def print_top_words(model, feature_names, n_top_words):
     norm = model.components_.sum(axis=1)[:, np.newaxis]
     for topic_idx, topic in enumerate(model.components_):
@@ -46,6 +50,7 @@ def print_top_words(model, feature_names, n_top_words):
             print("{:.3f}".format(topic[i] / norm[topic_idx][0]) 
                   + '\t' + feature_names[i])
 
+# Function to visualize the topics in a wordcloud
 def visualize_topics(lda, count_vect, terms_count):
     terms = count_vect.get_feature_names()
     for idx, topic in enumerate(lda.components_):
@@ -74,7 +79,7 @@ def visualize_topics(lda, count_vect, terms_count):
 
 #%% RUN LDA
 
-# get data
+# Get data
 category = 'Candy & Chocolate'
 train_path = 'data/' + category + '/df_train.csv'
 test_path = 'data/' + category + '/df_test.csv'
@@ -83,7 +88,7 @@ df_test = pd.read_csv(test_path)
 df_train = df_train.dropna(axis=0,subset=['description'])
 df_test = df_test.dropna(axis=0,subset=['description'])
 
-# Options to try with our LDA
+# Options to tune hyperparamets in LDA model
 # Beware it will try *all* of the combinations, so it'll take ages
 search_params = {'n_components': [2, 3, 4], 'learning_decay': [.6, .7, .8]}
 
@@ -111,7 +116,7 @@ print("Best Model's Params: ", gridsearch.best_params_)
 n_topics = gridsearch.best_params_['n_components']
 learning_decay = gridsearch.best_params_['learning_decay']
 
-# Run LDA with tuned parameters
+# Run LDA on description with tuned parameters
 X_train_lda, X_test_lda, lda, count_vect = train_lda(df_train, df_test, n_topics, learning_decay, 'description')
 
 # Visualize topics as wordclouds
