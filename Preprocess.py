@@ -107,7 +107,7 @@ def preprocess_price(metadata_df):
     # Split the data in a 75 % split train and test set. 
     df_train, df_test = train_test_split(df, train_size=0.75)
 
-    # Hvordan skal det her forstås?
+    # Below we find the mean price for every cateogry. 
     categories = []
     category_means = []
     categories = df_train.category.unique()
@@ -119,8 +119,12 @@ def preprocess_price(metadata_df):
     category_stat_df = pd.DataFrame(dict)
     category_stat_df = category_stat_df.set_index('categories')
 
+    # Next for all NULL values we assign the price to be the mean price in that category.
+
     df_train['price'] = df_train.apply(lambda row: category_stat_df.loc[row['category']].values[0] if row['price'] != row['price'] else row['price'], axis = 1)
     df_test['price'] = df_test.apply(lambda row: category_stat_df.loc[row['category']].values[0] if row['price'] != row['price'] else row['price'], axis = 1)
+    
+    # Here we drop the category column. 
     columns = df_train.columns
     if 'category' in columns:
         df_train = df_train.drop(columns = ['category'])
@@ -141,31 +145,47 @@ elif category == 'Snack Foods':
 elif category == 'Beverages':
     Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union(['tea','coffee','water','cup','supplement','flavor','year','food','condition'])
 
-# Kjær tror det er bedst du skriver kommentarer her
+# First we read the "prepared" data and the proper category found in the "exploratory part"
 metadata_df = pd.read_csv('data/'+category+'/df_'+category+'.csv')
+
+#We clone the category, as we will need this in order to preprocess price, but we will remove the original category column, 
+# when we create dummy data
 metadata_df['orig category'] = metadata_df['category']
 dummy_df = pd.get_dummies(metadata_df, columns=['brand','orig category'])
+# We drop brand as we can't have non numerical values. 
 metadata_df = metadata_df.drop(columns=['brand'])
 
+# We apply the preprocess price function, which handles some of the preprocess functions as well as splits the data in train and test.
 df_train, df_test = preprocess_price(metadata_df)
 df_train_dummy, df_test_dummy = preprocess_price(dummy_df)
 
+# Next the second part of the preprocess will be applied.
 df_train, df_test = preprocess_data(df_train, df_test)
 df_train_dummy, df_test_dummy = preprocess_data(df_train_dummy, df_test_dummy)
 
+## We drop description when we do pca on the data as it is non-numerical. Also we drop std_rating as it is quite hightly correlated with 
+# Avg. rating, and it seems unlikely that std_rating can be gathered in a situation where average rating (the target) can't.
 df_train_dummy = df_train_dummy.drop(columns = ['description','std_rating'])
 df_test_dummy = df_test_dummy.drop(columns = ['description','std_rating'])
 
+## Next we decompose our data.
 pca = PCA(n_components=100)
 pca.fit(df_train_dummy)
 print(pca.explained_variance_ratio_)
+
+## The explained variance have been calculated, and it seems only 2 components are neccesary.
 pca = PCA(n_components=2).fit(df_train_dummy)
 pca_values = pca.fit_transform(df_train_dummy)
+
+## Then we create 5 clusters using KMeans.
 kmeans = KMeans(n_clusters=5).fit(pca_values)
+
+## We assign these clusters to our original (preprocessed) data.
 df_train['cluster'] = kmeans.labels_
 pca_values_test = pca.transform(df_test_dummy)
 df_test['cluster'] = kmeans.predict(pca_values_test)
 
+## We one hot encode the clusters, so that any model trained on the data, wan't assume there is a relationship, between the values.
 df_train = pd.get_dummies(df_train, columns = ['cluster'])
 df_test = pd.get_dummies(df_test, columns = ['cluster'])
 
