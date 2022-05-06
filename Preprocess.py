@@ -14,12 +14,10 @@ nltk.download('wordnet')
 nltk.download('punkt')
 from nltk.stem import WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
-Stop_Words= _stop_words.ENGLISH_STOP_WORDS
 from bs4 import BeautifulSoup
 from sklearn.model_selection import train_test_split
 
 def preprocess_data(df_train, df_test):
-    # split data, so we DON'T use test for preprocessing
     # get number of also_buy
     df_train['also_buy'] = df_train['also_buy'].fillna('').apply(get_number_also_buy)
     df_test['also_buy'] = df_test['also_buy'].fillna('').apply(get_number_also_buy)
@@ -84,11 +82,11 @@ def text_processing(text):
         if c not in string.punctuation])
     # lowercase
     text = "".join([c.lower() for c in text])
+    # stemming / lematizing (optional)
+    text = " ".join([lemmatizer.lemmatize(w) for w in text.split()])
     # remove stopwords
     text = " ".join([w for w in text.split() 
         if w not in Stop_Words])
-    # stemming / lematizing (optional)
-    text = " ".join([lemmatizer.lemmatize(w) for w in text.split()])
     return text
 
 def preprocess_price(metadata_df):
@@ -119,6 +117,13 @@ def preprocess_price(metadata_df):
     return df_train, df_test
 
 category = 'Snack Foods'
+if category == 'Candy & Chocolate':
+    Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union(['chocolate','supplement','cocoa','candy','cure','condition'])
+elif category == 'Snack Foods':
+    Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union(['snack','food','fda','flavor','product','ingredient','statement'])
+elif category == 'Beverages':
+    Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union(['tea','coffee','water','cup','supplement','flavor','year','food','condition'])
+
 metadata_df = pd.read_csv('data/'+category+'/df_'+category+'.csv')
 metadata_df['orig category'] = metadata_df['category']
 dummy_df = pd.get_dummies(metadata_df, columns=['brand','orig category'])

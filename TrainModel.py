@@ -16,23 +16,12 @@ from datetime import date
 np.random.seed(42)
 
 # load data
-category = 'Candy & Chocolate'
-if category == 'all':
-        # load data 
-        df = pd.read_csv('data/lda_and_preprocessed_df.csv')
-        # get dummies and drop description
-        df = pd.get_dummies(df, columns=['category','top_brand'])
-        df = df.drop(columns=['description','std_rating'])
-else:
-        # load data 
-        df_train = pd.read_csv('data/' + category + '/df_train_lda.csv')
-        df_test = pd.read_csv('data/' + category + '/df_test_lda.csv')
-        # get dummies and drop description
+category = 'Snack Foods'
+df_train = pd.read_csv('data/' + category + '/df_train_lda.csv')
+df_test = pd.read_csv('data/' + category + '/df_test_lda.csv')
 
-        # CLUSTERING
-        # df_train = pd.get_dummies(df_train, columns=['top_brand'])
-        df_train = df_train.drop(columns=['description','std_rating'])
-        df_test = df_test.drop(columns=['description','std_rating'])
+df_train = df_train.drop(columns=['description','std_rating'])
+df_test = df_test.drop(columns=['description','std_rating'])
 df_train = df_train.dropna()
 df_test = df_test.dropna()
 
@@ -141,7 +130,6 @@ def train_regression_models(X_train, X_test, y_train, y_test):
     names = ['linear_regression', 'xgb_regressor', 'catboost_regressor', 'sgd_regressor', 'elastic_net', 
             'bayesian_ridge', 'gb_regressor']
     best_idx = np.argmin(MAEs)
-    print(best_idx)
     return models[best_idx], names[best_idx]
 
 def tune_model(model, name, X_train, y_train):
@@ -172,7 +160,7 @@ def tune_model(model, name, X_train, y_train):
 
 # train and tune model
 model, name = train_regression_models(X_train, X_test, y_train, y_test)
-params, tuned_model = tune_model(model, name, X_train, y_train)
+# params, tuned_model = tune_model(model, name, X_train, y_train)
 
 # validate model
 # predictions = tuned_model.predict(X_test)
@@ -183,17 +171,9 @@ params, tuned_model = tune_model(model, name, X_train, y_train)
 # print("The MAE of the model is: ", mean_absolute_error(y_test, predictions))
 
 today = date.today()
-
-if category == 'all':
-        filename = 'models/best_performing_model_'+str(today)+'.sav'
-        pickle.dump(model, open(filename, 'wb'))
-else:
-        filename = 'models/'+category+'/best_performing_model_'+str(today)+'.sav'
-        pickle.dump(model, open(filename, 'wb'))
-
-if category == 'all':
-        filename = 'models/tuned_'+name+'_'+str(today)+'.sav'
-        pickle.dump(model, open(filename, 'wb'))
-else:
-        filename = 'models/'+category+'/tuned_'+name+'_'+str(today)+'.sav'
-        pickle.dump(model, open(filename, 'wb'))
+# save model
+filename = 'models/'+category+'/best_performing_model_'+str(today)+'.sav'
+pickle.dump(model, open(filename, 'wb'))
+# save tuned model
+# filename = 'models/'+category+'/tuned_'+name+'_'+str(today)+'.sav'
+# pickle.dump(tuned_model, open(filename, 'wb'))
