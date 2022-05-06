@@ -65,7 +65,7 @@ def get_brand(row, brands):
         return row
     else:
         return 'Other'
-# Get the rank
+# Get the rank from list
 def get_rank(row):
     if isinstance(row, list):
         if len(row) > 0:
@@ -74,6 +74,7 @@ def get_rank(row):
             return ''
     else:
         return row
+
 # Use only rows with list of information else nan
 def get_description(row):
     if isinstance(row, list):
@@ -83,6 +84,7 @@ def get_description(row):
             return np.nan
     else:
         return row
+
 # Function used to clean text data
 def text_processing(text):
     # remove punctuation 
@@ -96,12 +98,16 @@ def text_processing(text):
     text = " ".join([w for w in text.split() 
         if w not in Stop_Words])
     return text
-# 
+# Function for preprocessing the prize where the data also will splitted in a train and a test set. 
 def preprocess_price(metadata_df):
+    # Drop columns we don't use
     df = metadata_df.drop(columns = ['item','title','feature','main_cat','similar_item','details','timestamp'])
-    
+    # Empty columns can't be used for anything
     df = df.dropna(axis=0,subset=['avg_rating','num_ratings','description'])
+    # Split the data in a 75 % split train and test set. 
     df_train, df_test = train_test_split(df, train_size=0.75)
+
+    # Hvordan skal det her forstås?
     categories = []
     category_means = []
     categories = df_train.category.unique()
@@ -126,7 +132,7 @@ def preprocess_price(metadata_df):
 
 
 
-# Words from already trained lda model, which are useless 
+# Words from already trained lda model. The words are removed because they either occur in multiple topics or doesn't make sense in the topic. 
 category = 'Snack Foods'
 if category == 'Candy & Chocolate':
     Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union(['chocolate','supplement','cocoa','candy','cure','condition'])
@@ -135,6 +141,7 @@ elif category == 'Snack Foods':
 elif category == 'Beverages':
     Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union(['tea','coffee','water','cup','supplement','flavor','year','food','condition'])
 
+# Kjær tror det er bedst du skriver kommentarer her
 metadata_df = pd.read_csv('data/'+category+'/df_'+category+'.csv')
 metadata_df['orig category'] = metadata_df['category']
 dummy_df = pd.get_dummies(metadata_df, columns=['brand','orig category'])
