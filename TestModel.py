@@ -1,11 +1,14 @@
 import pickle
 import numpy as np
 import pandas as pd
+from sklearn.metrics import mean_absolute_error, r2_score, explained_variance_score
 
-filename = 'models/lda_model2022-04-23.sav'
+category = 'Candy & Chocolate'
+
+filename = 'models/'+category+'/lda_model_2022-05-01.sav'
 lda_model = pickle.load(open(filename, 'rb'))
 
-filename = 'models/count_vect_model2022-04-23.sav'
+filename = 'models/'+category+'/count_vect_model_2022-05-01.sav'
 count_vect_model = pickle.load(open(filename, 'rb'))
 
 def print_top_words(model, feature_names, n_top_words):
@@ -20,3 +23,16 @@ def print_top_words(model, feature_names, n_top_words):
 counts_feature_names = count_vect_model.get_feature_names()
 n_top_words = 10
 print_top_words(lda_model, counts_feature_names, n_top_words)
+
+filename = 'models/'+category+'/tuned_gb_regressor_2022-05-01.sav'
+best_model = pickle.load(open(filename, 'rb'))
+
+test_df = pd.read_csv('data/'+category+'/df_test_lda.csv')
+test_df = test_df.drop(columns = ['description','std_rating'])
+X_test = test_df.drop(columns=['avg_rating'])
+y_test = test_df['avg_rating']
+
+y_gb_regressor = best_model.predict(X_test)
+MAE_gb_regressor = mean_absolute_error(y_test, y_gb_regressor)
+
+print("MAE = ",MAE_gb_regressor)
