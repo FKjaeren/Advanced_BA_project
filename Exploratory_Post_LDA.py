@@ -1,17 +1,24 @@
+#Import packages
 from math import prod
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+## Define the category to investigate
 category = 'Candy & Chocolate'
+
+##Load data
 df_train = pd.read_csv('data/'+category+'/df_train_lda.csv')
 
+## Drop description as we assume we have gotten the most out of this variable using LDA.
 df_train = df_train.drop(columns=['description'])
 
+## Create a correlation plot?
 sns.heatmap(df_train.corr().round(2), cmap='Blues', annot=True)\
    .set_title('Correlation matrix')
 plt.show()
 
+## Define a subset of data for plotting purposes.
 df_subset = df_train[df_train['price']<80]
 df_subset = df_subset[df_subset['also_buy']<400]
 #df_subset = df_subset[df_subset['rank']]
@@ -66,6 +73,8 @@ sns.heatmap(products_to_enhance.corr().round(2), cmap='Blues', annot=True)\
    .set_title('Correlation matrix')
 plt.show()
 
+
+## Find the 200 best rated products
 
 indexes = df_train['avg_rating'].sort_values(ascending=False)[0:199].index.to_list()
 
