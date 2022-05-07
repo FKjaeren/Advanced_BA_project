@@ -17,7 +17,7 @@ from datetime import date
 np.random.seed(42)
 
 # load data and select specific category 
-category = 'Snack Foods'
+category = 'Candy & Chocolate'
 df_train = pd.read_csv('data/' + category + '/df_train_lda.csv')
 df_test = pd.read_csv('data/' + category + '/df_test_lda.csv')
 
@@ -164,7 +164,7 @@ def tune_model(model, name, X_train, y_train):
 
 # train and tune model
 model, name = train_regression_models(X_train, X_test, y_train, y_test)
-params, tuned_model = tune_model(model, name, X_train, y_train)
+#params, tuned_model = tune_model(model, name, X_train, y_train)
 
 # validate model
 # predictions = tuned_model.predict(X_test)

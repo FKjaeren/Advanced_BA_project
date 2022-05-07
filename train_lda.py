@@ -9,7 +9,7 @@ from sklearn.model_selection import GridSearchCV
 from datetime import date
 import wordcloud
 import matplotlib.pyplot as plt
-
+from nltk import word_tokenize
 # set random seed
 np.random.seed(42)
 
@@ -23,21 +23,37 @@ def get_len(text):
         return len(text)
 
 # Function where LDA is trained on both the trainf and test. Both datasets are returned along with the model and count_vect
-def train_lda(df_train, df_test, n_topics, ld, text):
-
+def train_lda(df_train, df_test, gridsearch, text):
+    docs_train = df_train[text].values
+    #docs_train = np.vectorize(docs_train)
+    #docs_train = [word_tokenize(d) for d in docs_train]
+    docs_test = df_test[text]
+    #docs_test = [word_tokenize(d) for d in docs_test]
     count_vect = CountVectorizer()
-    bow_counts_train = count_vect.fit_transform(df_train[text].values)
-    bow_counts_test = count_vect.transform(df_test[text].values)
+    bow_counts_train = count_vect.fit_transform(docs_train)
+    bow_counts_test = count_vect.transform(docs_test)
 
-    lda = LatentDirichletAllocation(n_components=n_topics, max_iter=5,
-                                learning_method='online',
-                                learning_offset=50.,
+    cv_matrix = count_vect.fit_transform(docs_train)
+    gridsearch.fit(cv_matrix)
+
+    ## Save the best model
+    best_lda = gridsearch.best_estimator_
+    # What did we find?
+    print("Best Model's Params: ", gridsearch.best_params_)
+
+    # Train LDA with best params
+    n_topics = gridsearch.best_params_['n_components']
+    ld = gridsearch.best_params_['learning_decay']
+
+    lda = LatentDirichletAllocation(n_components=n_topics, max_iter=10,
+                                learning_method='batch',
+                                learning_offset=10.,
                                 learning_decay=ld)
 
     X_train_lda = lda.fit_transform(bow_counts_train)
     X_test_lda = lda.transform(bow_counts_test)
 
-    return X_train_lda, X_test_lda, lda, count_vect
+    return X_train_lda, X_test_lda, lda, count_vect, best_lda, n_topics
 
 
 # Function to print the top words in a topic
@@ -90,7 +106,7 @@ df_test = df_test.dropna(axis=0,subset=['description'])
 
 # Options to tune hyperparamets in LDA model
 # Beware it will try *all* of the combinations, so it'll take ages
-search_params = {'n_components': [2, 3, 4], 'learning_decay': [.6, .7, .8]}
+search_params = {'n_components': [4,6, 8,10], 'learning_decay': [.7]}
 
 # Set up LDA with the options we'll keep static
 model = LatentDirichletAllocation(learning_method='online',
@@ -101,23 +117,13 @@ model = LatentDirichletAllocation(learning_method='online',
 gridsearch = GridSearchCV(model,
                           param_grid=search_params,
                           n_jobs=-1,
-                          verbose=1)
+                          verbose=2,
+                         )
 count_vect = CountVectorizer()
-cv_matrix = count_vect.fit_transform(df_train['description'].values)
-gridsearch.fit(cv_matrix)
 
-## Save the best model
-best_lda = gridsearch.best_estimator_
-
-# What did we find?
-print("Best Model's Params: ", gridsearch.best_params_)
-
-# Train LDA with best params
-n_topics = gridsearch.best_params_['n_components']
-learning_decay = gridsearch.best_params_['learning_decay']
 
 # Run LDA on description with tuned parameters
-X_train_lda, X_test_lda, lda, count_vect = train_lda(df_train, df_test, n_topics, learning_decay, 'description')
+X_train_lda, X_test_lda, lda, count_vect, best_lda, n_topics = train_lda(df_train, df_test, gridsearch, 'description')
 
 # Visualize topics as wordclouds
 visualize_topics(lda, count_vect, 25)
@@ -133,9 +139,11 @@ df_test_lda = df_test.merge(X_test_lda_df, left_index=True, right_index=True)
 
 # Save merged data + model
 today = date.today()
-df_train_lda.to_csv('data/' + category + '/df_train_lda.csv',index=False)
-df_test_lda.to_csv('data/' + category + '/df_test_lda.csv',index=False)
-filename = 'models/'+category+'/lda_model_'+str(today)+'.sav'
+df_train_lda.to_csv('data/' + category + '/df_train_4_components_lda.csv',index=False)
+df_test_lda.to_csv('data/' + category + '/df_test_4_components_lda.csv',index=False)
+filename = 'models/'+category+'/lda_model_4_components'+str(today)+'.sav'
 pickle.dump(lda, open(filename, 'wb'))
 filename = 'models/'+category+'/count_vect_model_'+str(today)+'.sav'
 pickle.dump(count_vect, open(filename, 'wb'))
+
+# %%

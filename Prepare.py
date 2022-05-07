@@ -65,7 +65,6 @@ raw_ratings, raw_reviews, raw_metadata = load_data(rating_filepath=rating_filepa
 reviews_df, metadata_df = prepare_data(raw_ratings, raw_reviews, raw_metadata)
 
 # Save the new dataframes to later use. 
-reviews_df.to_csv('data/reviews_df.csv',index=False)
 metadata_df.to_csv('data/metadata_df.csv',index=False)
 
 

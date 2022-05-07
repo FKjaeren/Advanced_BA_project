@@ -53,7 +53,7 @@ plt.tight_layout()
 plt.show()
 
 # Select category 
-category = 'Snack Foods'
+category = 'Candy & Chocolate'
 df_cat = df[df['category']==category]
 
 # Save dataframe for category 

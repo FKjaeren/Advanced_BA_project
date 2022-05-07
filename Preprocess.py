@@ -137,9 +137,11 @@ def preprocess_price(metadata_df):
 
 
 # Words from already trained lda model. The words are removed because they either occur in multiple topics or doesn't make sense in the topic. 
-category = 'Snack Foods'
+category = 'Candy & Chocolate'
 if category == 'Candy & Chocolate':
-    Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union(['chocolate','supplement','cocoa','candy','cure','condition'])
+    Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union(['chocolate','supplement','cocoa','candy','cure','condition','flavor','statement','product',
+                                                        'health','milk','intended','dietary', 'prevent','fda','diagnose','regarding',
+                                                        'evaluated','disease','treat','sugar','sweet','oz','40','color'])
 elif category == 'Snack Foods':
     Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union(['snack','food','fda','flavor','product','ingredient','statement'])
 elif category == 'Beverages':
@@ -174,11 +176,24 @@ pca.fit(df_train_dummy)
 print(pca.explained_variance_ratio_)
 
 ## The explained variance have been calculated, and it seems only 2 components are neccesary.
-pca = PCA(n_components=2).fit(df_train_dummy)
+pca = PCA(n_components=3).fit(df_train_dummy)
 pca_values = pca.fit_transform(df_train_dummy)
 
+### Plot the pca values in order to identify if there are any clusters:
+fig = plt.figure()
+ax = fig.add_subplot(projection='3d')
+ax.scatter(pca_values[:,0], pca_values[:,1], pca_values[:,2])
+ax.set_xlabel('X Label')
+ax.set_ylabel('Y Label')
+ax.set_zlabel('Z Label')
+
+plt.show()
+
+plt.scatter(pca_values[:,0], pca_values[:,1])
+plt.show()
+
 ## Then we create 5 clusters using KMeans.
-kmeans = KMeans(n_clusters=5).fit(pca_values)
+kmeans = KMeans(n_clusters=2).fit(pca_values)
 
 ## We assign these clusters to our original (preprocessed) data.
 df_train['cluster'] = kmeans.labels_
