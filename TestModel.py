@@ -67,7 +67,7 @@ best_model = pickle.load(open(filename, 'rb'))
 
 ## Read test data
 test_df = pd.read_csv('data/'+category+'/df_test_4_components_lda.csv')
-test_df = test_df.drop(columns = ['description','std_rating'])
+test_df = test_df.drop(columns = ['description','std_rating','item'])
 
 # Define the X values and y values.
 X_test = test_df.drop(columns=['avg_rating'])
@@ -80,3 +80,4 @@ y_gb_regressor = best_model.predict(X_test)
 MAE_gb_regressor = mean_absolute_error(y_test, y_gb_regressor)
 
 print("MAE = ",MAE_gb_regressor)
+print(best_model)
