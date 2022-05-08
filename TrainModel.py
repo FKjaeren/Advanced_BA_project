@@ -18,11 +18,11 @@ np.random.seed(42)
 
 # load data and select specific category 
 category = 'Candy & Chocolate'
-df_train = pd.read_csv('data/' + category + '/df_train_lda.csv')
-df_test = pd.read_csv('data/' + category + '/df_test_lda.csv')
+df_train = pd.read_csv('data/' + category + '/df_train_4_components_lda.csv')
+df_test = pd.read_csv('data/' + category + '/df_test_4_components_lda.csv')
 
-df_train = df_train.drop(columns=['description','std_rating'])
-df_test = df_test.drop(columns=['description','std_rating'])
+df_train = df_train.drop(columns=['description','std_rating','item'])
+df_test = df_test.drop(columns=['description','std_rating','item'])
 df_train = df_train.dropna()
 df_test = df_test.dropna()
 
@@ -127,11 +127,13 @@ def train_regression_models(X_train, X_test, y_train, y_test):
 
     MAEs = [MAE_linear_regression, MAE_xgb_regressor, MAE_catboost_regressor, MAE_sgd_regressor,
             MAE_elastic_net, MAE_bayesian_ridge, MAE_gb_regressor]
+    R2s = [r2_linear_regression, r2_xgb_regressor, r2_catboost_regressor, r2_sgd_regressor,
+            r2_elastic_net, r2_bayesian_ridge, r2_gb_regressor]
     models = [linear_regression, xgb_regressor, catboost_regressor, sgd_regressor, elastic_net, 
             bayesian_ridge, gb_regressor]
     names = ['linear_regression', 'xgb_regressor', 'catboost_regressor', 'sgd_regressor', 'elastic_net', 
             'bayesian_ridge', 'gb_regressor']
-    best_idx = np.argmin(MAEs)
+    best_idx = np.argmax(R2s)
     return models[best_idx], names[best_idx]
 
 # Function to tune the best model where the two best are catboost or gb_regressor
@@ -176,7 +178,7 @@ model, name = train_regression_models(X_train, X_test, y_train, y_test)
 
 today = date.today()
 # save model
-filename = 'models/'+category+'/best_performing_model_'+str(today)+'.sav'
+filename = 'models/'+category+'/best_performing_model_4_'+str(today)+'.sav'
 pickle.dump(model, open(filename, 'wb'))
 # save tuned model
 # filename = 'models/'+category+'/tuned_'+name+'_'+str(today)+'.sav'

@@ -17,6 +17,7 @@ from nltk.stem import WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
 from bs4 import BeautifulSoup
 from sklearn.model_selection import train_test_split
+np.random.seed(42)
 
 # Function to preprocess the train and test dataset
 def preprocess_data(df_train, df_test):
@@ -101,11 +102,11 @@ def text_processing(text):
 # Function for preprocessing the prize where the data also will splitted in a train and a test set. 
 def preprocess_price(metadata_df):
     # Drop columns we don't use
-    df = metadata_df.drop(columns = ['item','title','feature','main_cat','similar_item','details','timestamp'])
+    df = metadata_df.drop(columns = ['title','feature','main_cat','similar_item','details','timestamp'])
     # Empty columns can't be used for anything
     df = df.dropna(axis=0,subset=['avg_rating','num_ratings','description'])
     # Split the data in a 75 % split train and test set. 
-    df_train, df_test = train_test_split(df, train_size=0.75)
+    df_train, df_test = train_test_split(df, train_size=0.75, random_state = 42)
 
     # Below we find the mean price for every cateogry. 
     categories = []
@@ -141,7 +142,8 @@ category = 'Candy & Chocolate'
 if category == 'Candy & Chocolate':
     Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union(['chocolate','supplement','cocoa','candy','cure','condition','flavor','statement','product',
                                                         'health','milk','intended','dietary', 'prevent','fda','diagnose','regarding',
-                                                        'evaluated','disease','treat','sugar','sweet','oz','40','color'])
+                                                        'evaluated','disease','treat','sugar','sweet','oz','40','color', 'natural','ingredient',
+                                                        'just','make', 'artificial'])
 elif category == 'Snack Foods':
     Stop_Words = _stop_words.ENGLISH_STOP_WORDS.union(['snack','food','fda','flavor','product','ingredient','statement'])
 elif category == 'Beverages':
@@ -154,6 +156,7 @@ metadata_df = pd.read_csv('data/'+category+'/df_'+category+'.csv')
 # when we create dummy data
 metadata_df['orig category'] = metadata_df['category']
 dummy_df = pd.get_dummies(metadata_df, columns=['brand','orig category'])
+dummy_df = dummy_df.drop(columns=['item'])
 # We drop brand as we can't have non numerical values. 
 metadata_df = metadata_df.drop(columns=['brand'])
 

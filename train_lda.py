@@ -106,7 +106,7 @@ df_test = df_test.dropna(axis=0,subset=['description'])
 
 # Options to tune hyperparamets in LDA model
 # Beware it will try *all* of the combinations, so it'll take ages
-search_params = {'n_components': [4,6, 8,10], 'learning_decay': [.7]}
+search_params = {'n_components': [4, 6, 8], 'learning_decay': [0.5, .7]}
 
 # Set up LDA with the options we'll keep static
 model = LatentDirichletAllocation(learning_method='online',
